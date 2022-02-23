@@ -8,7 +8,7 @@ services:
         dockerfile: ./Dockerfile
         args:
           GIT_TOKEN: add_personal_access_token_here
-      container_name: pysystemtrade
+      container_name: pysystemtrade${NAME_SUFFIX}
       restart: always
       environment:
         IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
@@ -26,7 +26,7 @@ services:
       build:
         context: ./ib_gateway
         dockerfile: ./Dockerfile
-      container_name: ib_gateway
+      container_name: ib_gateway${NAME_SUFFIX}
       restart: always
       ports:
         - "4002:4002"
@@ -39,7 +39,7 @@ services:
           ipv4_address: ${IPV4_NETWORK_PART}0.3
 
     mongo_db:
-      container_name: mongo_db
+      container_name: mongo_db${NAME_SUFFIX}
       image: mongo
       restart: always
       volumes:
@@ -50,10 +50,12 @@ services:
 
 volumes:
   mongo_db:
+    name: mongodb_volume${NAME_SUFFIX}
 
 networks:
   channel:
     driver: bridge
+    name: channel${NAME_SUFFIX}
     ipam:
       config:
         - subnet: ${IPV4_NETWORK_PART}0.0/16
