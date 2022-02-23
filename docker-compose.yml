@@ -1,0 +1,63 @@
+version: '3.9'
+
+services:
+
+    pysystemstrade:
+      build:
+        context: ./pysystemtrade
+        dockerfile: ./Dockerfile
+        args:
+          GIT_TOKEN: add_personal_access_token_here
+      container_name: pysystemtrade
+      restart: always
+      environment:
+        IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
+      depends_on:
+        - ib_gateway
+        - mongo_db
+        - mailserver
+      networks:
+        channel:
+          ipv4_address: ${IPV4_NETWORK_PART}0.5
+      stdin_open: true
+      tty: true
+
+    ib_gateway:
+      build:
+        context: ./ib_gateway
+        dockerfile: ./Dockerfile
+      container_name: ib_gateway
+      restart: always
+      ports:
+        - "4002:4002"
+        - "5900:5900"
+      environment:
+        TWSUSERID: "user_id"
+        TWSPASSWORD: "password"
+      networks:
+        channel:
+          ipv4_address: ${IPV4_NETWORK_PART}0.3
+
+    mongo_db:
+      container_name: mongo_db
+      image: mongo
+      restart: always
+      volumes:
+        - mongo_db:/data/db
+      networks:
+        channel:
+          ipv4_address: ${IPV4_NETWORK_PART}0.2
+
+volumes:
+  mongo_db:
+
+networks:
+  channel:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${IPV4_NETWORK_PART}0.0/16
+          gateway: ${IPV4_NETWORK_PART}0.1
+
+
+
