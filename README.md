@@ -71,7 +71,8 @@ This is an environment variable that gives all containers in the ecosystem the s
 
 `NAME_SUFFIX='_dev'` 
 
-Optional environment variabel. Standard is empty string. Used when running multiple ecosystems in paralell. Suffix prevents naming conflicts for containers, networks and volumes.
+Optional environment variabel. Standard is empty string. Used when running multiple ecosystems in paralell. Suffix prevents naming conflicts for containers, networks and volumes. **Note that if paralell ecosystems are spun up - host network facing ports, from the ib gateway controller, would have to be
+changed to an available port number. Namingconvention is host_port:container_port. So in docker-compose.yml "5900":"5900", could be changed to "5901":"5900". Same applies to "4002":"4002", of course.
 
 ### private_config.yaml
 Reason for having this important file outside of the private psysystemtrade repo is ease of ip address config for the containers. The file exists in; `./pysystemtrade>private_config.yaml` (When image is buildt, file is copied into /opt/projects/pysystemtrade/private in the pysystemtrade container.)
