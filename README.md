@@ -4,6 +4,8 @@ docker ecosystem for pysystemtrade. Contains;
 - container with pysystemtrade repo clone. 
 - container with ib gateway running
 - container with mongodb installed. 
+- A docker network 
+- A docker volume where mongo db is stored. 
 
 This readme explains how to deploy. 
  
@@ -91,7 +93,7 @@ Created a new gmail account for the task. Had to change setting in gmail account
 The `GIT_TOKEN` arg variable under pysystemstrade>build>args must recieve the github personal access token. 
 This is needed for the pull of the private version of the private_pysystemtrade repo
 
-### Misc useful commands 
+## Misc useful commands 
 To handle all of the containers in the environment simultaionously use compose;
 
 List all compose projects;\
@@ -106,4 +108,11 @@ List all docker networks; \
 Inspect network to see ip address and more;\
 `docker network inspect network_name`
  
- 
+## Remarks
+
+Environment variables mentioned in the [production guide](https://github.com/robcarver17/pysystemtrade/blob/master/docs/production.md), like `PYSYS_CODE`,  has not been added to a `~/.profile` file. Have not had a system in production in the ecosystem yet. Have been able to do data wrangling without the envrionment variables.
+
+## Todo's
+
+- Add section about how to backup database. 
+- Setup  ~/.profile
