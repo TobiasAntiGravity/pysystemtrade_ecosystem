@@ -16,7 +16,7 @@ This readme explains how to deploy.
 \
 `RUN git clone -b my_branch https://${GIT_TOKEN}:@github.com/GITUSERNAME/private_pysystemtrade_repo.git /opt/projects/pysystemtrade`\
 \
-\*Notes;*\
+*Notes;*\
 *i) my_branch is the branch with the production code. If this is master ignore -b section* \
 *ii) private_pysystemtrade_repo is of course your repo.* \
 *iii) `GIT_TOKEN` is a environment variable set in the `docker-compose.yml` file - see the Parameterization section below.*
