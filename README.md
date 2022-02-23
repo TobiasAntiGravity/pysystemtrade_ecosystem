@@ -68,6 +68,10 @@ Add the environment variable;
 
 This is an environment variable that gives all containers in the ecosystem the same network address (the first two parts of the ip address), so that They can interact on a docker network. [unfortunatley it is not possible to dynamically insert an environment](https://stackoverflow.com/a/41620747/1020693) variable into a .yaml file - therefore the network address will have to be statically typed into the private_config.yaml file.
 
+`NAME_SUFFIX='_dev'` 
+
+Optional environment variabel. Standard is empty string. Used when running multiple ecosystems in paralell. Suffix prevents naming conflicts for containers, networks and volumes.
+
 ### private_config.yaml
 Reason for having this important file outside of the private psysystemtrade repo is ease of ip address config for the containers. The file exists in; `./pysystemtrade>private_config.yaml` (When image is buildt, file is copied into /opt/projects/pysystemtrade/private in the pysystemtrade container.)
 
