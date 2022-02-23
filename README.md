@@ -11,8 +11,9 @@ This readme explains how to deploy.
  
 ## Step by step setup: 
  
-1) clone this repo to host machine. 
-2) Change the pysystemtrade repo to be cloned (if you have a private branch with customizations to run, - [discussed here](https://github.com/robcarver17/pysystemtrade/discussions/533)) In `pysystemtrade_ecosystem/pysystemtrade/Dockerfile`, change URI to fit your needs;\
+1) clone this repo to host machine.
+2) Add public fork of ib_gateway as subtree - see "Add ib_gateway subtree" section below. (added as the second step to avoid git throwing error that working tree has modifications. If this appears  commiting changes will resolve)
+3) Change the pysystemtrade repo to be cloned (if you have a private branch with customizations to run, - [discussed here](https://github.com/robcarver17/pysystemtrade/discussions/533)) In `pysystemtrade_ecosystem/pysystemtrade/Dockerfile`, change URI to fit your needs;\
 \
 `RUN git clone -b my_branch https://${GIT_TOKEN}:@github.com/GITUSERNAME/private_pysystemtrade_repo.git /opt/projects/pysystemtrade`\
 \
@@ -21,8 +22,8 @@ This readme explains how to deploy.
 *ii) private_pysystemtrade_repo is of course your repo.* \
 *iii) `GIT_TOKEN` is a environment variable set in the `docker-compose.yml` file - see the Parameterization section below.*
 
-3) Create a personal access token (if you are using github) and add it to the compose file under `GIT_TOKEN`
-4) Add public fork of ib_gateway as subtree - see "Add ib_gateway subtree" section below 
+4) Create a personal access token (if you are using github) and add it to the compose file under `GIT_TOKEN`
+
 5) Fill parameters into project see "Parameterization" section below  
 6) In the repo root folder write; \
 `docker compose up --build -d`
