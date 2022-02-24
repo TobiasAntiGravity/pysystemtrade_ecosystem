@@ -69,7 +69,7 @@ services:
 volumes:
   mongo_db:
     name: mongo_db_volume${NAME_SUFFIX}
-   mongo_conf:
+  mongo_conf:
     name: mongo_conf_volume${NAME_SUFFIX}
 
 networks:
