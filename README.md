@@ -20,18 +20,16 @@ This readme explains how to deploy.
 *Notes;*\
 *i) my_branch is the branch with the production code. If this is master ignore -b section* \
 *ii) private_pysystemtrade_repo is of course your repo.* \
-*iii) `GIT_TOKEN` is a environment variable set in the `docker-compose.yml` file - see the Parameterization section below.*
+*iii)`GIT_TOKEN` is an environment variable set in the `docker-compose.yml` file - see the Parameterization/docker-compose.yml section below. Only relevant if repo is in github and using personal access token*
 
-4) Create a personal access token (if you are using github) and add it to the compose file under `GIT_TOKEN`
-
-5) Fill parameters into project see "Parameterization" section below  
-6) In the repo root folder write; \
+4) Fill parameters into project see "Parameterization" section below  
+5) In the repo root folder write; \
 `docker compose up --build -d`
 
-7) To connect to the pysystemtrade container (or any other container for that matter)\
+6) To connect to the pysystemtrade container (or any other container for that matter)\
 `docker exec -it pysystemtrade /bin/bash`
 
-8) Pip install repo\
+7) Pip install repo\
 `cd /opt/projects/pysystemtrade`\
 `pip install -e .`
 
@@ -97,7 +95,7 @@ Created a new gmail account for the task. Had to change setting in gmail account
    
 ### docker-compose.yml
 The `GIT_TOKEN` arg variable under pysystemstrade>build>args must recieve the github personal access token. 
-This is needed for the pull of the private version of the private_pysystemtrade repo
+This is needed for the pull of the private version of the private_pysystemtrade repo. (this assumes your repo is in github)
 
 ## Misc useful commands 
 To handle all of the containers in the environment simultaionously use compose;
