@@ -15,7 +15,6 @@ services:
       depends_on:
         - ib_gateway
         - mongo_db
-        - mailserver
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.5
@@ -49,7 +48,7 @@ services:
           ipv4_address: ${IPV4_NETWORK_PART}0.2
     
     db-backup:
-      image: mongo   
+      image: alpine   
       profiles: ["backup"]      
       volumes:
         - mongo_db:/data/db
