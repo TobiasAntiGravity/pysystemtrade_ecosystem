@@ -116,10 +116,10 @@ Inspect network to see ip address and more;\
 Simple backup and restore facilities has been added. Below are the details on how to implement a scheduled backup, and how to restore data. Please try the backup and restore routine in advance to ensure that it actually works, before you need it. 
 
 ### Backup
-Docker volumes can be backed up by starting a temporary container mounted with volume to be backed up. The temporary container creates a tar backup to a a host directory mounted to the temporary container. From there, the host machine 
-will have to handle the backup file, moving it to a backup location, perhaps via a cron job. (did look into using https://github.com/offen/docker-volume-backup, but required swarm. Too involved for right now, perhaps at a later point) 
+Docker volumes can be backed up by starting a temporary container mounted with volume to be backed up. The temporary container creates two tar backup files to a a host directory mounted to the temporary container. From there, the host machine 
+will have to handle the two backup files, moving them to a backup location, perhaps via a cron job. (did look into using https://github.com/offen/docker-volume-backup, but required swarm. Too involved for right now, perhaps at a later point) 
 
-This method does a complete database dump, as it copies the entire volume. The size of the mongo database might become too large to handle in such a manner, requiring a snapshot incremental backup approach in the future. 
+This method does a complete database dump, as it copies all the data. The size of the mongo database might become too large to handle in such a manner, requiring a snapshot incremental backup approach in the future. 
 
 **Commands to schedule for periodic backups;**
 
@@ -137,7 +137,7 @@ For the below commands to work; a directory named `backup` must be located in th
 \
 *--rm ensures that the container is deleted after run is completed*\
 \
-this will have created the file `(pwd)/backup/backup.tar` for the cron job to move to a suitable backup location. 
+this will have created the files `(pwd)/backup/backup_db.tar` and `(pwd)/backup/backup_conf.tar` for the cron job to move to a suitable backup location. 
 
 - Start the stopped containers\
 \
@@ -150,7 +150,7 @@ A temporary container is created and mounted with the volume where backup is to 
 
 **Commands to restore a backup;**
 
-1) 	Ensure that the backup file exists as follows; `(pwd)/backup/backup.tar`
+1) 	Ensure that the backup files exists as follows; `(pwd)/backup/backup_db.tar` and `(pwd)/backup/backup_conf.tar`
 
 2) Ensure that containers consuming the mongodb volume is stopped;\
 \
@@ -161,7 +161,6 @@ A temporary container is created and mounted with the volume where backup is to 
 
 4) Start the stopped containers\
 `docker compose start pysystemtrade; docker compose start mongo_db`\
-
 
  
 ## Remarks

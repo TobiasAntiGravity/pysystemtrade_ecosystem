@@ -43,6 +43,7 @@ services:
       restart: always
       volumes:
         - mongo_db:/data/db
+        - mongo_conf:/data/configdb
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.2
@@ -52,20 +53,24 @@ services:
       profiles: ["backup"]      
       volumes:
         - mongo_db:/data/db
+        - mongo_conf:/data/configdb
         - ./backup:/backup
-      command: sh -c "tar cvf /backup/backup.tar /data/db"
+      command: sh -c "tar cvf /backup/backup_db.tar /data/db; tar cvf /backup/backup_conf.tar /data/configdb"
 
     db-restore:
       image: alpine    
       profiles: ["restore"]
       volumes:
         - mongo_db:/data/db
+        - mongo_conf:/data/configdb
         - ./backup:/backup
-      command: sh -c "cd /data/db && tar xvf /backup/backup.tar --strip 1"
+      command: sh -c "cd /data/db && tar xvf /backup/backup.tar --strip 1; cd /data/configdb && tar xvf /backup/backup_conf.tar --strip 1"
             
 volumes:
   mongo_db:
-    name: mongodb_volume${NAME_SUFFIX}
+    name: mongo_db_volume${NAME_SUFFIX}
+   mongo_conf:
+    name: mongo_conf_volume${NAME_SUFFIX}
 
 networks:
   channel:
