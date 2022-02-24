@@ -47,7 +47,23 @@ services:
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.2
+    
+    db-backup:
+      image: mongo   
+      profiles: ["backup"]      
+      volumes:
+        - mongo_db:/data/db
+        - ./backup:/backup
+      command: sh -c "tar cvf /backup/backup.tar /data/db"
 
+    db-restore:
+      image: alpine    
+      profiles: ["restore"]
+      volumes:
+        - mongo_db:/data/db
+        - ./backup:/backup
+      command: sh -c "cd /data/db && tar xvf /backup/backup.tar --strip 1"
+            
 volumes:
   mongo_db:
     name: mongodb_volume${NAME_SUFFIX}
@@ -62,4 +78,6 @@ networks:
           gateway: ${IPV4_NETWORK_PART}0.1
 
 
+ # Backup concept; https://stackoverflow.com/a/56432886/1020693
+ # about profile; https://docs.docker.com/compose/profiles/, https://stackoverflow.com/a/65957695/1020693
 
