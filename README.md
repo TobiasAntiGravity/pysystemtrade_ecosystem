@@ -113,16 +113,17 @@ Inspect network to see ip address and more;\
 `docker network inspect network_name`
 
 ## Backup and restore
-A simple backup and restore facilities has been added. Below are the details on how to implement a scheduled backup, and how to restore data. Please try the backup and restore routine in advance to ensure that it actually works, before you need it. 
+Simple backup and restore facilities has been added. Below are the details on how to implement a scheduled backup, and how to restore data. Please try the backup and restore routine in advance to ensure that it actually works, before you need it. 
 
-### backup
+### Backup
 Docker volumes can be backed up by starting a temporary container mounted with volume to be backed up. The temporary container creates a tar backup to a a host directory mounted to the temporary container. From there, the host machine 
-will have to handle the backup file, moving it to a backup location, perhaps via a cron job. (did look into using https://github.com/offen/docker-volume-backup, but required swarm.) This method does a complete database dump, as it copies the entire volume. The size of the 
-mongo database might become too large to handle in such a manner, requiring a snapshot incremental backup approach in the future. 
+will have to handle the backup file, moving it to a backup location, perhaps via a cron job. (did look into using https://github.com/offen/docker-volume-backup, but required swarm. Too involved for right now, perhaps at a later point) 
 
-What commands to schedule for periodic backups; 
+This method does a complete database dump, as it copies the entire volume. The size of the mongo database might become too large to handle in such a manner, requiring a snapshot incremental backup approach in the future. 
 
-For the below commands to work; a directory named `backup` must be located in the pysystemtrade_ecosystem root directory, and that commands are run from this same root directory (that it is pwd).
+**What commands to schedule for periodic backups;**
+
+For the below commands to work; a directory named `backup` must be located in the pysystemtrade_ecosystem root directory (this directory is included in the repo. Content has been added to .gitignore), and that commands are run from this same root directory (that it is pwd).
  
 - stop containers consuming the mongodb volume;\ 
 \
@@ -149,7 +150,7 @@ A temporary container is created and mounted with the volume where backup is to 
 
 Commands to restore a backup
 
-1) 	Ensure that the backup file is placed in; `(pwd)/backup/backup.tar`
+1) 	Ensure that the backup file exists as follows; `(pwd)/backup/backup.tar`
 
 2) Ensure that containers consuming the mongodb volume is stopped;\
 \
