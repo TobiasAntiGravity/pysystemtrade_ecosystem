@@ -121,7 +121,7 @@ will have to handle the backup file, moving it to a backup location, perhaps via
 
 This method does a complete database dump, as it copies the entire volume. The size of the mongo database might become too large to handle in such a manner, requiring a snapshot incremental backup approach in the future. 
 
-**What commands to schedule for periodic backups;**
+**Commands to schedule for periodic backups;**
 
 For the below commands to work; a directory named `backup` must be located in the pysystemtrade_ecosystem root directory (this directory is included in the repo. Content has been added to .gitignore), and that commands are run from this same root directory (that it is pwd).
  
@@ -145,10 +145,10 @@ For the below commands to work; a directory named `backup` must be located in th
 \
 *Note; the name of the containers might have a suffix depending on the `NAME_SUFFIX` environment variable in the .env file*\
 
-### restore
+### Restore
 A temporary container is created and mounted with the volume where backup is to be deployed. The temporary container unpacks the tar file `backup.tar`, located in the mounted host directory `(pwd)/backup/`. 
 
-Commands to restore a backup
+**Commands to restore a backup;**
 
 1) 	Ensure that the backup file exists as follows; `(pwd)/backup/backup.tar`
 
