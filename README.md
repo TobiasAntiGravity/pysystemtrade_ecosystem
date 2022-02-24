@@ -125,15 +125,15 @@ This method does a complete database dump, as it copies the entire volume. The s
 
 For the below commands to work; a directory named `backup` must be located in the pysystemtrade_ecosystem root directory (this directory is included in the repo. Content has been added to .gitignore), and that commands are run from this same root directory (that it is pwd).
  
-- stop containers consuming the mongodb volume; \ 
+- stop containers consuming the mongodb volume; \
 \
-`docker-compose stop pysystemtrade; docker-compose stop mongo_db`
+`docker compose stop pysystemtrade; docker compose stop mongo_db`
 \
 *Note; the name of the containers might have a suffix depending on the `NAME_SUFFIX` environment variable in the .env file*
 
 - Run the temporary backup container;\
 \
-`docker-compose run --rm db-backup`\
+`docker compose run --rm db-backup`\
 \
 *--rm ensures that the container is deleted after run is completed*\
 \
@@ -141,7 +141,7 @@ this will have created the file `(pwd)/backup/backup.tar` for the cron job to mo
 
 - Start the stopped containers\
 \
-`docker-compose start pysystemtrade; docker-compose start mongo_db`\
+`docker compose start pysystemtrade; docker compose start mongo_db`\
 \
 *Note; the name of the containers might have a suffix depending on the `NAME_SUFFIX` environment variable in the .env file*\
 
@@ -154,13 +154,13 @@ A temporary container is created and mounted with the volume where backup is to 
 
 2) Ensure that containers consuming the mongodb volume is stopped;\
 \
-`docker-compose stop pysystemtrade; docker-compose stop mongo_db` 
+`docker compose stop pysystemtrade; docker compose stop mongo_db` 
 
 3) Run the  container that uploads the backup into the db volume;\
-`docker-compose run --rm db-restore`
+`docker compose run --rm db-restore`
 
 4) Start the stopped containers\
-`docker-compose start pysystemtrade; docker-compose start mongo_db`\
+`docker compose start pysystemtrade; docker compose start mongo_db`\
 
 
  
