@@ -147,26 +147,25 @@ this will have created the files `(pwd)/backup/backup_db.tar` and `(pwd)/backup/
 
 ### Restore
 A temporary container is created and mounted with the volume where backup is to be deployed. The temporary container unpacks the tar file `backup.tar`, located in the mounted host directory `(pwd)/backup/`. 
+the new volumes with the backup data should be created before the mongo container, to avoid any overwrite issues. 
 
 **Commands to restore a backup;**
 
 1) 	Ensure that the backup files exists as follows; `(pwd)/backup/backup_db.tar` and `(pwd)/backup/backup_conf.tar`
 
-2) Ensure that containers consuming the mongodb volume is stopped;\
-\
-`docker compose stop pysystemtrade; docker compose stop mongo_db` 
+2) Containers consuming the mongodb volumes should be removed, along with removal of old volumes 
 
 3) Run the  container that uploads the backup into the db volume;\
 `docker compose run --rm db-restore`
 
-4) Start the stopped containers\
-`docker compose start pysystemtrade; docker compose start mongo_db`\
-
+4) Start the compose environment
+`docker compose up --build -d`
  
 ## Remarks
 
-Environment variables mentioned in the [production guide](https://github.com/robcarver17/pysystemtrade/blob/master/docs/production.md), like `PYSYS_CODE`,  has not been added to a `~/.profile` file. Have not had a system in production in the ecosystem yet. Have been able to do data wrangling without the envrionment variables.
-
+- Environment variables mentioned in the [production guide](https://github.com/robcarver17/pysystemtrade/blob/master/docs/production.md), like `PYSYS_CODE`,  has not been added to a `~/.profile` file. Have not had a system in production in the ecosystem yet. Have been able to do data wrangling without the envrionment variables.
+- The Mongo db is setup without any login credentials. Probably not the recommended way fo doing it - might come back to this later.
+ 
 ## Todo's
 
 - Setup  ~/.profile

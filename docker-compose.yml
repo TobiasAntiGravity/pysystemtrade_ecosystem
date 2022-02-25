@@ -55,7 +55,7 @@ services:
         - mongo_db:/data/db
         - mongo_conf:/data/configdb
         - ./backup:/backup
-      command: sh -c "tar cvf /backup/backup_db.tar /data/db; tar cvf /backup/backup_conf.tar /data/configdb"
+      command: sh -c "tar -cvf /backup/backup_db.tar /data/db; tar -cvf /backup/backup_conf.tar /data/configdb"
 
     db-restore:
       image: alpine    
@@ -64,7 +64,7 @@ services:
         - mongo_db:/data/db
         - mongo_conf:/data/configdb
         - ./backup:/backup
-      command: sh -c "cd /data/db && tar xvf /backup/backup_db.tar --strip 1; cd /data/configdb && tar xvf /backup/backup_conf.tar --strip 1"
+      command: sh -c "cd /data/ && tar -xvf /backup/backup_db.tar --strip 1; cd /data/ && tar -xvf /backup/backup_conf.tar --strip 1"
             
 volumes:
   mongo_db:
