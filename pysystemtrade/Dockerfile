@@ -8,6 +8,9 @@ RUN git clone -b my_branch https://${GIT_TOKEN}:@github.com/GITUSERNAME/private_
 FROM python:3.8.12 as final_stage
 
 ENV IPV4_NETWORK_PART=$IPV4_NETWORK_PART
+ENV PYSYS_CODE=$PYSYS_CODE
+ENV SCRIPT_PATH=$SCRIPT_PATH
+ENV ECHO_PATH=$ECHO_PATH
 
 RUN apt-get update
 RUN yes | apt-get install vim
@@ -32,8 +35,12 @@ RUN pip3 install statsmodels==0.12.2
 RUN mkdir /opt/projects
 COPY --from=builder /opt/projects /opt/projects
 COPY ./private_config.yaml /opt/projects/pysystemtrade/private/private_config.yaml
+
 WORKDIR /opt/projects/pysystemtrade
 RUN pip install -e .
+
+RUN mkdir $ECHO_PATH
+RUN export PATH=$PATH:$SCRIPT_PATH
 
 ENTRYPOINT ["tail", "-f", "/dev/null"]  
 

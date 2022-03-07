@@ -65,8 +65,26 @@ This is an environment variable that gives all containers in the ecosystem the s
 
 `NAME_SUFFIX='_dev'` 
 
-Optional environment variabel. Standard is empty string. Used when running multiple ecosystems in paralell. Suffix prevents naming conflicts for containers, networks and volumes. **Note that if paralell ecosystems are spun up - host network facing ports, from the ib gateway controller, would have to be
-changed to an available port number. Namingconvention is host_port:container_port. So in docker-compose.yml "5900":"5900", could be changed to "5901":"5900". Same applies to "4002":"4002", of course.
+Optional environment variable. Standard is empty string. Used when running multiple ecosystems in parallel. Suffix prevents naming conflicts for containers, networks and volumes. **Note that if paralell ecosystems are spun up - host network facing ports, from the ib gateway controller, would have to be
+changed to an available port number. Naming convention is host_port:container_port. So in docker-compose.yml "5900":"5900", could be changed to "5901":"5900". Same applies to "4002":"4002", of course.
+
+`PYSYS_CODE`
+
+[The subsection Quick start guide](https://github.com/robcarver17/pysystemtrade/blob/master/docs/production.md#quick-start-guide)
+under Prerequisites, this environment variable is listed as `PYSYS_CODE=/home/user_name/pysystemtrade`. The default value in the
+.env file is correct for the ecosystem setup.
+
+`SCRIPT_PATH`
+
+[The subsection Quick start guide](https://github.com/robcarver17/pysystemtrade/blob/master/docs/production.md#quick-start-guide)
+under Prerequisites, this environment variable is listed as `SCRIPT_PATH=/home/user_name/pysystemtrade/sysproduction/linux/scripts`. The default value in the
+.env file is correct for the ecosystem setup.
+
+`ECHO_PATH`
+
+[The subsection Quick start guide](https://github.com/robcarver17/pysystemtrade/blob/master/docs/production.md#quick-start-guide)
+under Prerequisites, this environment variable is listed as `ECHO_PATH=/home/user_name/echos`. The default value in the
+.env file is correct for the ecosystem setup.
 
 ### private_config.yaml
 Reason for having this important file outside of the private psysystemtrade repo is ease of ip address config for the containers. The file exists in; `./pysystemtrade>private_config.yaml` (When image is buildt, file is copied into /opt/projects/pysystemtrade/private in the pysystemtrade container.)

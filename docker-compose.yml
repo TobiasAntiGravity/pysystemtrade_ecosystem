@@ -12,6 +12,9 @@ services:
       restart: always
       environment:
         IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
+        PYSYS_CODE: ${PYSYS_CODE}
+        SCRIPT_PATH: ${SCRIPT_PATH}
+        ECHO_PATH: ${ECHO_PATH}
       depends_on:
         - ib_gateway
         - mongo_db
