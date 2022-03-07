@@ -32,6 +32,8 @@ RUN pip3 install statsmodels==0.12.2
 RUN mkdir /opt/projects
 COPY --from=builder /opt/projects /opt/projects
 COPY ./private_config.yaml /opt/projects/pysystemtrade/private/private_config.yaml
+WORKDIR /opt/projects/pysystemtrade
+RUN pip install -e .
 
 ENTRYPOINT ["tail", "-f", "/dev/null"]  
 
