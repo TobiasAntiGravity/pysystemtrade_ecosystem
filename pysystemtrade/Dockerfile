@@ -47,7 +47,7 @@ RUN pip install -e .
 
 RUN mkdir $ECHO_PATH
 
-ENTRYPOINT ["/private/commands.sh"]
+ENTRYPOINT ["/opt/projects/pysystemtrade/private/commands.sh"]
 
 # ENTRYPOINT added so that container is started on compose up. If not environment variable IPV4_NETWORK_PART
 # will not be populated. Work around. (IPV4_NETWORK_PART needed in private_config.yaml)
