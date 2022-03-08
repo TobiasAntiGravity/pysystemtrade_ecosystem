@@ -31,8 +31,11 @@ This readme explains how to deploy.
 
 7) Check that you have recieved a test email, so that you know for sure that the email credentials setup in private_config.yaml are correct. 
 
-7) Should perhaps delete login credentials that was added in step 5 after things are up and running. **note that some of the login credentials are presisted in the docker image / environment variables,
+8) Do any setups necessary for your specific pysystemtrade repo. - like adding your local curreny, if it is not already present in the pysystemtrade repo.   
+9) Should perhaps delete login credentials that was added in step 5 after things are up and running. **note that some of the login credentials are presisted in the docker image / environment variables,
 so it should be stressed that this is not a secure way of handling credentials, regardless if you delete hard coded credentials after launching the machines**
+
+
 
 ## Add ib_gateway subtree
 **Disclaimer; My fork is used here. As you will see - any repo can be dropped in here, so other docker solutions can be used [like this proposal](https://github.com/robcarver17/pysystemtrade/discussions/544). Substituting would require other changes - at least docker-compose.yml would have to be changed**
