@@ -104,6 +104,7 @@ Is an account identifier
 `email_pwd: 'your_password'`\
 `email_server: 'smtp.gmail.com'`\
 `email_to: 'your@email.com'`
+`email_port: 587
 
 Created a new gmail account for the task. Had to change setting in gmail account to allow "less secure access". Whitelisted the created gmail address. Still ended in junk - had to mark as non junk
    

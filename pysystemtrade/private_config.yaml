@@ -8,3 +8,4 @@ email_address: 'sender_mail@gmail.com'
 email_pwd: 'your_password'
 email_server: 'smtp.gmail.com'
 email_to: 'your@email.com'
+email_port: 587
