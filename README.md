@@ -29,6 +29,8 @@ This readme explains how to deploy.
 6) To connect to the pysystemtrade container (or any other container for that matter)\
 `docker exec -it pysystemtrade /bin/bash`
 
+7) Check that you have recieved a test email, so that you know for sure that the email credentials setup in private_config.yaml are correct. 
+
 7) Should perhaps delete login credentials that was added in step 5 after things are up and running. **note that some of the login credentials are presisted in the docker image / environment variables,
 so it should be stressed that this is not a secure way of handling credentials, regardless if you delete hard coded credentials after launching the machines**
 

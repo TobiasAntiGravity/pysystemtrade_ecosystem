@@ -39,13 +39,15 @@ RUN pip3 install statsmodels==0.12.2
 RUN mkdir /opt/projects
 COPY --from=builder /opt/projects /opt/projects
 COPY ./private_config.yaml /opt/projects/pysystemtrade/private/private_config.yaml
+COPY ./commands.sh /opt/projects/pysystemtrade/private/commands.sh
+COPY ./mail_credentials_test.py /opt/projects/pysystemtrade/private/mail_credentials_test.py
 
 WORKDIR /opt/projects/pysystemtrade
 RUN pip install -e .
 
 RUN mkdir $ECHO_PATH
 
-ENTRYPOINT ["tail", "-f", "/dev/null"]  
+ENTRYPOINT ["/private/commands.sh"]
 
 # ENTRYPOINT added so that container is started on compose up. If not environment variable IPV4_NETWORK_PART
 # will not be populated. Work around. (IPV4_NETWORK_PART needed in private_config.yaml)
