@@ -13,7 +13,7 @@ This readme explains how to deploy.
  
 1) clone this repo to host machine.
 2) Add public fork of ib_gateway as subtree - see "Add ib_gateway subtree" section below. (added as the second step to avoid git throwing error that working tree has modifications. If this appears  commiting changes will resolve)
-3) Change the pysystemtrade repo to be cloned (if you have a private branch with customizations to run, - [discussed here](https://github.com/robcarver17/pysystemtrade/discussions/533)) In `pysystemtrade_ecosystem/pysystemtrade/Dockerfile`, change URI to fit your needs;\
+3) Change the pysystemtrade repo to be cloned in the `pysystemtrade/Dockerfile` (if you have a private branch with customizations to run, - [discussed here](https://github.com/robcarver17/pysystemtrade/discussions/533)) In `pysystemtrade_ecosystem/pysystemtrade/Dockerfile`, change URI to fit your needs;\
 \
 `RUN git clone -b my_branch https://${GIT_TOKEN}:@github.com/GITUSERNAME/private_pysystemtrade_repo.git /opt/projects/pysystemtrade`\
 \
@@ -60,6 +60,9 @@ Under ib_gateway and environment add;
 
 `TWSUSERID: "userID"`\
 `TWSPASSWORD: "password"`
+
+The `GIT_TOKEN` arg variable under pysystemstrade>build>args must recieve the github personal access token. 
+This is needed for the pull of the private version of the private_pysystemtrade repo. (this assumes your repo is in github)
  
 ### .env file
 Add the environment variable;
@@ -113,10 +116,6 @@ Is an account identifier
 
 Created a new gmail account for the task. Had to change setting in gmail account to allow "less secure access". Whitelisted the created gmail address. Still ended in junk - had to mark as non junk
    
-### docker-compose.yml
-The `GIT_TOKEN` arg variable under pysystemstrade>build>args must recieve the github personal access token. 
-This is needed for the pull of the private version of the private_pysystemtrade repo. (this assumes your repo is in github)
-
 ## Misc useful commands 
 To handle all of the containers in the environment simultaionously use compose;
 
@@ -188,4 +187,6 @@ the new volumes with the backup data should be created before the mongo containe
  
 ## Todo's
 
-- Setup  ~/.profile
+- Fix invocation of linux scripts - not working at the moment
+- Look at system clock - should be uniform accross accross ecosystem. 
+- add ipython as part of the ecosystem 
