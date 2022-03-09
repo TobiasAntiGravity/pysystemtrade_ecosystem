@@ -60,6 +60,9 @@ Under ib_gateway and environment add;
 
 `TWSUSERID: "userID"`\
 `TWSPASSWORD: "password"`
+
+The `GIT_TOKEN` arg variable under pysystemstrade>build>args must recieve the github personal access token. 
+This is needed for the pull of the private version of the private_pysystemtrade repo. (this assumes your repo is in github)
  
 ### .env file
 Add the environment variable;
@@ -113,10 +116,6 @@ Is an account identifier
 
 Created a new gmail account for the task. Had to change setting in gmail account to allow "less secure access". Whitelisted the created gmail address. Still ended in junk - had to mark as non junk
    
-### docker-compose.yml
-The `GIT_TOKEN` arg variable under pysystemstrade>build>args must recieve the github personal access token. 
-This is needed for the pull of the private version of the private_pysystemtrade repo. (this assumes your repo is in github)
-
 ## Misc useful commands 
 To handle all of the containers in the environment simultaionously use compose;
 
