@@ -187,4 +187,6 @@ the new volumes with the backup data should be created before the mongo containe
  
 ## Todo's
 
-- Setup  ~/.profile
+- Fix invocation of linux scripts - not working at the moment
+- Look at system clock - should be uniform accross accross ecosystem. 
+- add ipython as part of the ecosystem 
