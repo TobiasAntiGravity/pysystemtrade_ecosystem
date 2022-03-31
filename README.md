@@ -183,10 +183,12 @@ the new volumes with the backup data should be created before the mongo containe
 ## Remarks
 
 - Environment variables mentioned in the [production guide](https://github.com/robcarver17/pysystemtrade/blob/master/docs/production.md), like `PYSYS_CODE`,  has not been added to a `~/.profile` file. Have not had a system in production in the ecosystem yet. Have been able to do data wrangling without the envrionment variables.
-- The Mongo db is setup without any login credentials. Probably not the recommended way fo doing it - might come back to this later.
+- The Mongo db is setup without any login credentials. Probably not the recommended way of doing it - might come back to this later.
+
+### Tip's on running psystemtrade in the ecosystem
+- For the cron deamon to be able to execute the scripts; i) Do not use environment variables in the cron syntax. ii) In the file `sysproduction/linux/scripts/p`, the path of the python interpreter has to be added to the p file like so;\
+`/usr/local/bin/python run.py $1`
+- System time on every container is, as far I can see is UTC/GMT. Works for my purpose, changing this looks to involve package installations and more.
  
 ## Todo's
-
-- Fix invocation of linux scripts - not working at the moment
-- Look at system clock - should be uniform accross accross ecosystem. 
 - add ipython as part of the ecosystem 
