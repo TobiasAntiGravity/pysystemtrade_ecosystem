@@ -17,6 +17,7 @@ ENV ECHO_PATH=$ECHO_PATH
 ENV PATH "$PATH:$SCRIPT_PATH"
 
 RUN apt-get update
+RUN yes | apt-get install cron
 RUN yes | apt-get install vim
 
 RUN pip3 install --upgrade pip
