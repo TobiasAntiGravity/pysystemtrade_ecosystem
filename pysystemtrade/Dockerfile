@@ -1,5 +1,10 @@
 FROM python:3.8.12 as builder
 
+# LABEL
+LABEL maintainer="tobias@anti-gravity.as"
+LABEL version="0.1"
+LABEL description="This is custom Docker Image for creating a pysystemtrade container in the pysystemtrade_ecosystem"
+
 ARG GIT_TOKEN
 
 RUN mkdir /opt/projects
@@ -39,7 +44,6 @@ RUN pip3 install statsmodels==0.12.2
 
 RUN mkdir /opt/projects
 COPY --from=builder /opt/projects /opt/projects
-COPY ./private_config.yaml /opt/projects/pysystemtrade/private/private_config.yaml
 COPY ./commands.sh /opt/projects/pysystemtrade/private/commands.sh
 COPY ./mail_credentials_test.py /opt/projects/pysystemtrade/private/mail_credentials_test.py
 

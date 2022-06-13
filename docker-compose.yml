@@ -50,6 +50,20 @@ services:
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.2
+          
+    ipython:
+      build:
+        context: ./ipython
+        dockerfile: ./Dockerfile
+        args:
+          GIT_TOKEN: add_personal_access_token_here
+      container_name: ipython${NAME_SUFFIX}
+      restart: always
+      ports:
+        - "8888":"8888"
+      networks:
+        channel:
+          ipv4_address: ${IPV4_NETWORK_PART}0.6
     
     db-backup:
       image: alpine   
@@ -68,7 +82,7 @@ services:
         - mongo_conf:/data/configdb
         - ./backup:/backup
       command: sh -c "cd /data/ && tar -xvf /backup/backup_db.tar --strip 1; cd /data/ && tar -xvf /backup/backup_conf.tar --strip 1"
-            
+      
 volumes:
   mongo_db:
     name: mongo_db_volume${NAME_SUFFIX}

@@ -1,11 +1,13 @@
  # pysystemtrade_ecosystem
 
 docker ecosystem for pysystemtrade. Contains; 
-- container with pysystemtrade repo clone. 
+- container with pysystemtrade repo clone running. 
 - container with ib gateway running
-- container with mongodb installed. 
+- container with mongodb running
+- container with ipython running
 - A docker network 
 - A docker volume where mongo db is stored. 
+- A docker volume where ipython notebooks are stored
 
 This readme explains how to deploy. 
  
@@ -13,8 +15,8 @@ This readme explains how to deploy.
  
 1) clone this repo to host machine.
 2) Add public fork of ib_gateway as subtree - see "Add ib_gateway subtree" section below. (added as the second step to avoid git throwing error that working tree has modifications. If this appears  commiting changes will resolve)
-3) Assuming you have a private branch of pysystemtrade ([discussed here](https://github.com/robcarver17/pysystemtrade/discussions/533)), you need to change the pysystemtrade repo to be cloned into the pysystemtrade container. The change of URI must be done in the following line in `pysystemtrade_ecosystem/pysystemtrade/Dockerfile`;\
-\
+3) The setup assumes you have a private branch of pysystemtrade. ([discussed here](https://github.com/robcarver17/pysystemtrade/discussions/533)), To import this repo into both the pysystemtrade container and into the ipython container, you need to modify the following placeholder URI below in two files `pysystemtrade_ecosystem/pysystemtrade/Dockerfile` and `pysystemtrade_ecosystem/ipython/Dockerfile`;\
+
 `RUN git clone -b my_branch https://${GIT_TOKEN}:@github.com/GITUSERNAME/private_pysystemtrade_repo.git /opt/projects/pysystemtrade`\
 \
 *Notes;*\
@@ -23,7 +25,7 @@ This readme explains how to deploy.
 *iii)`GIT_TOKEN` is an environment variable set in the `docker-compose.yml` file - see the Parameterization/docker-compose.yml section below. Only relevant if repo is in github and using personal access token*
 
 4) Fill parameters into project see "Parameterization" section below  
-5) In the repo root folder write; \
+5) In the command line, while in the repo root folder, write; \
 `docker compose up --build -d`
 
 6) To connect to the pysystemtrade container (or any other container for that matter)\
@@ -34,7 +36,6 @@ This readme explains how to deploy.
 8) Do any setups necessary for your specific pysystemtrade repo. - like adding your local curreny, if it is not already present in the pysystemtrade repo.   
 9) Should perhaps delete login credentials that was added in step 5 after things are up and running. **note that some of the login credentials are presisted in the docker image / environment variables,
 so it should be stressed that this is not a secure way of handling credentials, regardless if you delete hard coded credentials after launching the machines**
-
 
 
 ## Add ib_gateway subtree
@@ -61,8 +62,12 @@ Under ib_gateway and environment add;
 `TWSUSERID: "userID"`\
 `TWSPASSWORD: "password"`
 
+**As explained under step 3. above;**\
 The `GIT_TOKEN` arg variable under pysystemstrade>build>args must recieve the github personal access token. 
-This is needed for the pull of the private version of the private_pysystemtrade repo. (this assumes your repo is in github)
+This is needed for the pull of the private version of the private_pysystemtrade repo into the pysystemtrade container. (this assumes your repo is in github)
+
+The same has to be done under ipython>build>args. The `GIT_TOKEN` arg variable must be filled with the github personal access token. 
+This is needed for the pull of the private version of the private_pysystemtrade repo into the iptyhon container. (this assumes your repo is in github)
  
 ### .env file
 Add the environment variable;
@@ -94,30 +99,13 @@ under Prerequisites, this environment variable is listed as `SCRIPT_PATH=/home/u
 under Prerequisites, this environment variable is listed as `ECHO_PATH=/home/user_name/echos`. The default value in the
 .env file is correct for the ecosystem setup.
 
-### private_config.yaml
-Reason for having this important file outside of the private psysystemtrade repo is ease of ip address config for the containers. The file exists in; `./pysystemtrade>private_config.yaml` (When image is buildt, file is copied into /opt/projects/pysystemtrade/private in the pysystemtrade container.)
+## About Ipython
 
-`ib_ipaddress: '{STATICALLY_TYPE_IPV4_NETWORK_PART}0.3'`\
-Add the IPV4_NETWORK_PART from the .env file, into the placeholder "STATICALLY_TYPE_IPV4_NETWORK_PART". With the example above "172.25." would be entered.
+The root folder is the root folder of the private pysystemtrade repo. A `pysystemtrade/private/notebooks` folder is created,
+for storing notebooks. Push to private repo for version control. 
 
-`mongo_host: mongodb://{STATICALLY_TYPE_IPV4_NETWORK_PART}0.2:27017`\
-Add the IPV4_NETWORK_PART from the .env file, into the placeholder "STATICALLY_TYPE_IPV4_NETWORK_PART". With the example above "172.25." would be entered.
-*Note that the mongodb container is setup without any username password. URI therefore only needs IP address.*
-
-`broker_account:`\
-Is an account identifier
-
-
-`email_address: 'email_sender_address'`\
-`email_pwd: 'your_password'`\
-`email_server: 'smtp.gmail.com'`\
-`email_to: 'your@email.com'`
-`email_port: 587
-
-Created a new gmail account for the task. Had to change setting in gmail account to allow "less secure access". Whitelisted the created gmail address. Still ended in junk - had to mark as non junk
-   
 ## Misc useful commands 
-To handle all of the containers in the environment simultaionously use compose;
+To handle all of the containers in the environment simultaionously use compose while in the repo root folder;
 
 List all compose projects;\
 `docker compose ls`
@@ -137,6 +125,8 @@ Simple backup and restore facilities has been added. Below are the details on ho
 ### Backup
 Docker volumes can be backed up by starting a temporary container mounted with volume to be backed up. The temporary container creates two tar backup files to a a host directory mounted to the temporary container. From there, the host machine 
 will have to handle the two backup files, moving them to a backup location, perhaps via a cron job. (did look into using https://github.com/offen/docker-volume-backup, but required swarm. Too involved for right now, perhaps at a later point) 
+
+(Backups be done for the mongo_db volumes and for the notebooks. All one has to do is to change change between the "db-backup" and the "notebooks" profile names in the below examples)
 
 This method does a complete database dump, as it copies all the data. The size of the mongo database might become too large to handle in such a manner, requiring a snapshot incremental backup approach in the future. 
 
@@ -189,6 +179,4 @@ the new volumes with the backup data should be created before the mongo containe
 - For the cron deamon to be able to execute the scripts; i) Do not use environment variables in the cron syntax. ii) In the file `sysproduction/linux/scripts/p`, the path of the python interpreter has to be added to the p file like so;\
 `/usr/local/bin/python run.py $1`
 - System time on every container is, as far I can see is UTC/GMT. Works for my purpose, changing this looks to involve package installations and more.
- 
-## Todo's
-- add ipython as part of the ecosystem 
+

@@ -1,0 +1,11 @@
+ib_ipaddress: '{STATICALLY_TYPE_IPV4_NETWORK_PART}0.3'
+ib_port: 4002
+broker_account: account_no
+mongo_host: mongodb://{STATICALLY_TYPE_IPV4_NETWORK_PART}0.2:27017
+mongo_db: 'production' # fits with all the documentation
+
+email_address: 'sender_mail@gmail.com'
+email_pwd: 'your_password'
+email_server: 'smtp.gmail.com'
+email_to: 'your@email.com'
+email_port: 587
