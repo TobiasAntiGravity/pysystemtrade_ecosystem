@@ -6,6 +6,9 @@ LABEL version="0.1"
 LABEL description="This is custom Docker Image for creating a jupyterlab container in the pysystemtrade_ecosystem"
 
 ARG GIT_TOKEN
+ARG ECHO_PATH=$ECHO_PATH
+
+ENV ECHO_PATH=$ECHO_PATH
 
 RUN mkdir /opt/projects
 RUN git clone -b my_branch https://${GIT_TOKEN}:@github.com/GITUSERNAME/private_pysystemtrade_repo.git /opt/projects/pysystemtrade
@@ -35,5 +38,7 @@ COPY ./jupyter_server_config.py /usr/jupyter_server_config.py
 RUN mkdir /opt/projects/pysystemtrade/private/notebooks
 WORKDIR /opt/projects/pysystemtrade
 RUN pip install -e .
+
+RUN mkdir $ECHO_PATH
  
 ENTRYPOINT jupyter-lab --allow-root --no-browser --port=8888  --ip=0.0.0.0 --config=/usr/jupyter_server_config.py

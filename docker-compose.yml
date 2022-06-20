@@ -57,6 +57,7 @@ services:
         dockerfile: ./Dockerfile
         args:
           GIT_TOKEN: add_personal_access_token_here
+          ECHO_PATH: ${ECHO_PATH}
       container_name: ipython${NAME_SUFFIX}
       restart: always
       ports:
