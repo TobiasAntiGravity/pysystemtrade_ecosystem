@@ -35,7 +35,6 @@ RUN pip3 install statsmodels==0.12.2
 RUN pip3 install jupyterlab
 
 COPY ./jupyter_server_config.py /usr/jupyter_server_config.py
-RUN mkdir /opt/projects/pysystemtrade/private/notebooks
 WORKDIR /opt/projects/pysystemtrade
 RUN pip install -e .
 
