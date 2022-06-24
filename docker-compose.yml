@@ -74,7 +74,7 @@ services:
       volumes:
         - mongo_db:/data/db
         - mongo_conf:/data/configdb
-        - ./backup:/backup
+        - ./db_backup:/backup
       command: sh -c "tar -cvf /backup/backup_db.tar /data/db; tar -cvf /backup/backup_conf.tar /data/configdb"
 
     db-restore:
@@ -83,7 +83,7 @@ services:
       volumes:
         - mongo_db:/data/db
         - mongo_conf:/data/configdb
-        - ./backup:/backup
+        - ./db_backup:/backup
       command: sh -c "cd /data/ && tar -xvf /backup/backup_db.tar --strip 1; cd /data/ && tar -xvf /backup/backup_conf.tar --strip 1"
       
 volumes:
