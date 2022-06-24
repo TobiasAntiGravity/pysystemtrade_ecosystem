@@ -51,6 +51,8 @@ WORKDIR /opt/projects/pysystemtrade
 RUN pip install -e .
 
 RUN mkdir $ECHO_PATH
+RUN mkdir /home/backups
+RUN mkdir /home/csv_backup
 
 RUN chmod +x /opt/projects/pysystemtrade/private/commands.sh
 

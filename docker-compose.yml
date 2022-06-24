@@ -18,6 +18,8 @@ services:
       depends_on:
         - ib_gateway
         - mongo_db
+      volumes:
+        - ./csv_backup:/home/csv_backup
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.5
