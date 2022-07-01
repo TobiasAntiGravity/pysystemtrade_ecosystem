@@ -3,7 +3,7 @@ from datetime import datetime
 
 import docker
 
-client = docker.from_env()
+client = docker.DockerClient(base_url='unix://var/run/docker.sock')
 
 NAME_SUFFIX = ""
 
