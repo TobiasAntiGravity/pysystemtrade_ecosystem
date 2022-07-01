@@ -2,24 +2,176 @@ version: '3.9'
 
 services:
 
-    pysystemstrade:
+    stack_handler:
       build:
         context: ./pysystemtrade
         dockerfile: ./Dockerfile
         args:
-          GIT_TOKEN: add_personal_access_token_here
+          GIT_TOKEN: ${GIT_TOKEN}
           SCRIPT_PATH: ${SCRIPT_PATH}
           ECHO_PATH: ${ECHO_PATH}
-      container_name: pysystemtrade${NAME_SUFFIX}
-      restart: always
+      container_name: stack_handler{NAME_SUFFIX}
+      restart: on-failure
       environment:
         IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
         PYSYS_CODE: ${PYSYS_CODE}
+      command: ["/bin/sh", "-c", "cd sysproduction/linux/scripts && run_stack_handler && python /opt/projects/pysystemtrade/syscontrol.monitor.py"]
       depends_on:
         - ib_gateway
         - mongo_db
       volumes:
-        - ./csv_backup:/home/csv_backup
+        - ./echos/stack_handler:/home/echos
+      networks:
+        channel:
+          ipv4_address: ${IPV4_NETWORK_PART}0.5
+      stdin_open: true
+      tty: true
+
+    capital_update:
+      build:
+        context: ./pysystemtrade
+        dockerfile: ./Dockerfile
+        args:
+          GIT_TOKEN: ${GIT_TOKEN}
+          SCRIPT_PATH: ${SCRIPT_PATH}
+          ECHO_PATH: ${ECHO_PATH}
+      container_name: capital_update{NAME_SUFFIX}
+      restart: on-failure
+      environment:
+        IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
+        PYSYS_CODE: ${PYSYS_CODE}
+      command: ["/bin/sh", "-c", "cd sysproduction/linux/scripts &&  && run_capital_update && python /opt/projects/pysystemtrade/syscontrol.monitor.py"]
+      depends_on:
+        - ib_gateway
+        - mongo_db
+      volumes:
+        - ./echos/capital_update:/home/echos
+      networks:
+        channel:
+          ipv4_address: ${IPV4_NETWORK_PART}0.5
+      stdin_open: true
+      tty: true
+
+    price_update:
+      build:
+        context: ./pysystemtrade
+        dockerfile: ./Dockerfile
+        args:
+          GIT_TOKEN: ${GIT_TOKEN}
+          SCRIPT_PATH: ${SCRIPT_PATH}
+          ECHO_PATH: ${ECHO_PATH}
+      container_name: price_update{NAME_SUFFIX}
+      restart: no
+      environment:
+        IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
+        PYSYS_CODE: ${PYSYS_CODE}
+      command: ["/bin/sh", "-c", "cd sysproduction/linux/scripts && run_daily_price_updates && python /opt/projects/pysystemtrade/syscontrol.monitor.py"]
+      depends_on:
+        - ib_gateway
+        - mongo_db
+      volumes:
+        - ./echos/price_update:/home/echos
+      networks:
+        channel:
+          ipv4_address: ${IPV4_NETWORK_PART}0.5
+      stdin_open: true
+      tty: true
+
+    system:
+      build:
+        context: ./pysystemtrade
+        dockerfile: ./Dockerfile
+        args:
+          GIT_TOKEN: ${GIT_TOKEN}
+          SCRIPT_PATH: ${SCRIPT_PATH}
+          ECHO_PATH: ${ECHO_PATH}
+      container_name: system{NAME_SUFFIX}
+      restart: no
+      environment:
+        IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
+        PYSYS_CODE: ${PYSYS_CODE}
+      command: ["/bin/sh", "-c", "cd sysproduction/linux/scripts && run_systems && python /opt/projects/pysystemtrade/syscontrol.monitor.py"]
+      depends_on:
+        - ib_gateway
+        - mongo_db
+      volumes:
+        - ./echos/system:/home/echos
+      networks:
+        channel:
+          ipv4_address: ${IPV4_NETWORK_PART}0.5
+      stdin_open: true
+      tty: true
+
+    generator:
+      build:
+        context: ./pysystemtrade
+        dockerfile: ./Dockerfile
+        args:
+          GIT_TOKEN: ${GIT_TOKEN}
+          SCRIPT_PATH: ${SCRIPT_PATH}
+          ECHO_PATH: ${ECHO_PATH}
+      container_name: generator{NAME_SUFFIX}
+      restart: no
+      environment:
+        IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
+        PYSYS_CODE: ${PYSYS_CODE}
+      command: ["/bin/sh", "-c", "cd sysproduction/linux/scripts && run_strategy_order_generator && python /opt/projects/pysystemtrade/syscontrol.monitor.py"]
+      depends_on:
+        - ib_gateway
+        - mongo_db
+      volumes:
+        - ./echos/generator:/home/echos
+      networks:
+        channel:
+          ipv4_address: ${IPV4_NETWORK_PART}0.5
+      stdin_open: true
+      tty: true
+
+    cleaner:
+      build:
+        context: ./pysystemtrade
+        dockerfile: ./Dockerfile
+        args:
+          GIT_TOKEN: ${GIT_TOKEN}
+          SCRIPT_PATH: ${SCRIPT_PATH}
+          ECHO_PATH: ${ECHO_PATH}
+      container_name: cleaner{NAME_SUFFIX}
+      restart: no
+      environment:
+        IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
+        PYSYS_CODE: ${PYSYS_CODE}
+      command: ["/bin/sh", "-c", "cd sysproduction/linux/scripts && run_cleaners && python /opt/projects/pysystemtrade/syscontrol.monitor.py"]
+      depends_on:
+        - ib_gateway
+        - mongo_db
+      volumes:
+        - ./echos/cleaner:/home/echos
+      networks:
+        channel:
+          ipv4_address: ${IPV4_NETWORK_PART}0.5
+      stdin_open: true
+      tty: true
+
+    reports:
+      build:
+        context: ./pysystemtrade
+        dockerfile: ./Dockerfile
+        args:
+          GIT_TOKEN: ${GIT_TOKEN}
+          SCRIPT_PATH: ${SCRIPT_PATH}
+          ECHO_PATH: ${ECHO_PATH}
+      container_name: reports{NAME_SUFFIX}
+      restart: no
+      environment:
+        IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
+        PYSYS_CODE: ${PYSYS_CODE}
+      command: ["/bin/sh", "-c", "cd sysproduction/linux/scripts && run_cleaners && python /opt/projects/pysystemtrade/syscontrol.monitor.py"]
+      depends_on:
+        - ib_gateway
+        - mongo_db
+      volumes:
+        - ./echos/reports:/home/echos
+        - ./reports:/home/reports
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.5
@@ -36,8 +188,8 @@ services:
         - "4002:4002"
         - "5900:5900"
       environment:
-        TWSUSERID: "user_id"
-        TWSPASSWORD: "password"
+        TWSUSERID: ${TWSUSERID}
+        TWSPASSWORD: ${TWSPASSWORD}
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.3
@@ -52,7 +204,7 @@ services:
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.2
-          
+
     ipython:
       build:
         context: ./ipython
@@ -68,16 +220,15 @@ services:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.6
     
-    db-backup:
-      image: alpine   
-      profiles: ["backup"]      
+    db_backup:
+      image: alpine
       volumes:
         - mongo_db:/data/db
         - mongo_conf:/data/configdb
         - ./db_backup:/backup
       command: sh -c "tar -cvf /backup/backup_db.tar /data/db; tar -cvf /backup/backup_conf.tar /data/configdb"
 
-    db-restore:
+    db_restore:
       image: alpine    
       profiles: ["restore"]
       volumes:
@@ -85,7 +236,9 @@ services:
         - mongo_conf:/data/configdb
         - ./db_backup:/backup
       command: sh -c "cd /data/ && tar -xvf /backup/backup_db.tar --strip 1; cd /data/ && tar -xvf /backup/backup_conf.tar --strip 1"
-      
+
+
+
 volumes:
   mongo_db:
     name: mongo_db_volume${NAME_SUFFIX}
