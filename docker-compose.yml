@@ -61,7 +61,6 @@ services:
           SCRIPT_PATH: ${SCRIPT_PATH}
           ECHO_PATH: ${ECHO_PATH}
       container_name: price_update{NAME_SUFFIX}
-      restart: no
       environment:
         IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
         PYSYS_CODE: ${PYSYS_CODE}
@@ -86,7 +85,6 @@ services:
           SCRIPT_PATH: ${SCRIPT_PATH}
           ECHO_PATH: ${ECHO_PATH}
       container_name: system{NAME_SUFFIX}
-      restart: no
       environment:
         IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
         PYSYS_CODE: ${PYSYS_CODE}
@@ -111,7 +109,6 @@ services:
           SCRIPT_PATH: ${SCRIPT_PATH}
           ECHO_PATH: ${ECHO_PATH}
       container_name: generator{NAME_SUFFIX}
-      restart: no
       environment:
         IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
         PYSYS_CODE: ${PYSYS_CODE}
@@ -136,7 +133,6 @@ services:
           SCRIPT_PATH: ${SCRIPT_PATH}
           ECHO_PATH: ${ECHO_PATH}
       container_name: cleaner{NAME_SUFFIX}
-      restart: no
       environment:
         IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
         PYSYS_CODE: ${PYSYS_CODE}
@@ -161,7 +157,6 @@ services:
           SCRIPT_PATH: ${SCRIPT_PATH}
           ECHO_PATH: ${ECHO_PATH}
       container_name: reports{NAME_SUFFIX}
-      restart: no
       environment:
         IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
         PYSYS_CODE: ${PYSYS_CODE}
