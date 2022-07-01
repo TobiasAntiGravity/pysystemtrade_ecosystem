@@ -47,7 +47,7 @@ def run_container_and_wait_to_finish(container_name: str, docker_client: docker.
 def run_container_managment():
     '''docker compose must create containers via docker compose create before script can run'''
 
-    stack_container_object = client.containers.get(container_id ="stack_handler" + NAME_SUFFIX)
+    stack_container_object = client.containers.get(container_id="stack_handler" + NAME_SUFFIX)
 
     if stack_container_object.status != 'running':
         stack_container_object.start()
@@ -76,7 +76,7 @@ def run_container_managment():
 
     else:
         #place holder for logger
-        print('Critical: something unexpected happened. Stack handler and capital update stopped before'
+        print('Critical: something unexpected happened. Stack handler and capital update stopped before')
         print('the defined stop time. Should be checked')
 
 # todo: move backup files to external storage after backup

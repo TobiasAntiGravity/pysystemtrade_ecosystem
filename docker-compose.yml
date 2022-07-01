@@ -23,7 +23,7 @@ services:
         - ./echos/stack_handler:/home/echos
       networks:
         channel:
-          ipv4_address: ${IPV4_NETWORK_PART}0.5
+          ipv4_address: ${IPV4_NETWORK_PART}0.4
       stdin_open: true
       tty: true
 
@@ -48,7 +48,7 @@ services:
         - ./echos/capital_update:/home/echos
       networks:
         channel:
-          ipv4_address: ${IPV4_NETWORK_PART}0.5
+          ipv4_address: ${IPV4_NETWORK_PART}0.3
       stdin_open: true
       tty: true
 
@@ -72,7 +72,7 @@ services:
         - ./echos/price_update:/home/echos
       networks:
         channel:
-          ipv4_address: ${IPV4_NETWORK_PART}0.5
+          ipv4_address: ${IPV4_NETWORK_PART}0.7
       stdin_open: true
       tty: true
 
@@ -96,7 +96,7 @@ services:
         - ./echos/system:/home/echos
       networks:
         channel:
-          ipv4_address: ${IPV4_NETWORK_PART}0.5
+          ipv4_address: ${IPV4_NETWORK_PART}0.8
       stdin_open: true
       tty: true
 
@@ -120,7 +120,7 @@ services:
         - ./echos/generator:/home/echos
       networks:
         channel:
-          ipv4_address: ${IPV4_NETWORK_PART}0.5
+          ipv4_address: ${IPV4_NETWORK_PART}0.9
       stdin_open: true
       tty: true
 
@@ -144,11 +144,11 @@ services:
         - ./echos/cleaner:/home/echos
       networks:
         channel:
-          ipv4_address: ${IPV4_NETWORK_PART}0.5
+          ipv4_address: ${IPV4_NETWORK_PART}0.10
       stdin_open: true
       tty: true
 
-    reports:
+    $reports:
       build:
         context: ./pysystemtrade
         dockerfile: ./Dockerfile
@@ -169,7 +169,7 @@ services:
         - ./reports:/home/reports
       networks:
         channel:
-          ipv4_address: ${IPV4_NETWORK_PART}0.5
+          ipv4_address: ${IPV4_NETWORK_PART}0.11
       stdin_open: true
       tty: true
 
