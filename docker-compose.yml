@@ -29,33 +29,13 @@ services:
       tty: true
       init: true
 
-    tester:
-      image: pysystem_image
-      container_name: tester${NAME_SUFFIX}
-      environment:
-        IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
-        PYSYS_CODE: ${PYSYS_CODE}
-      command: ["/bin/sh", "-c", "cd sysproduction/linux/scripts && update_sampled_contracts"]
-      depends_on:
-        - ib_gateway
-        - mongo_db
-        - stack_and_capital_handler   # needed to avoid building same image twice
-      volumes:
-        - ./echos:/home/echos
-      networks:
-        channel:
-          ipv4_address: ${IPV4_NETWORK_PART}0.7
-      stdin_open: true
-      tty: true
-      init: true
-
     daily_processes:
       image: pysystem_image
-      container_name: daily_processes${NAME_SUFFIX}
+      container_name: daily_processes{NAME_SUFFIX}
       environment:
         IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
         PYSYS_CODE: ${PYSYS_CODE}
-      command: ["/bin/sh", "-c", "command_scripts/daily_processes.bash"]
+      command: ["/bin/bash", "-c", "command_scripts/daily_processes.bash"]
       depends_on:
         - ib_gateway
         - mongo_db
