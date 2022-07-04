@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
 
-    stack_handler:
+    stack_and_capital_handler:
       image: pysystem_image
       build:
         context: ./pysystemtrade
@@ -16,133 +16,59 @@ services:
       environment:
         IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
         PYSYS_CODE: ${PYSYS_CODE}
-      command: ["/bin/sh", "-c", "cd sysproduction/linux/scripts && run_stack_handler && python /opt/projects/pysystemtrade/syscontrol.monitor.py"]
+      command: ["/bin/bash", "-c", "command_scripts/stack_and_capital_handler_container_commands.bash"]
       depends_on:
         - ib_gateway
         - mongo_db
       volumes:
-        - ./echos/stack_handler:/home/echos
+        - ./echos:/home/echos
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.4
       stdin_open: true
       tty: true
+      tini: true
 
-    capital_update:
-      image: pysystem_image
-      container_name: capital_update{NAME_SUFFIX}
-      restart: on-failure
-      environment:
-        IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
-        PYSYS_CODE: ${PYSYS_CODE}
-      command: ["/bin/sh", "-c", "cd sysproduction/linux/scripts &&  && run_capital_update && python /opt/projects/pysystemtrade/syscontrol.monitor.py"]
-      depends_on:
-        - ib_gateway
-        - mongo_db
-        - stack_handler
-      volumes:
-        - ./echos/capital_update:/home/echos
-      networks:
-        channel:
-          ipv4_address: ${IPV4_NETWORK_PART}0.3
-      stdin_open: true
-      tty: true
-
-    price_update:
+    tester:
       image: pysystem_image
       container_name: price_update{NAME_SUFFIX}
       environment:
         IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
         PYSYS_CODE: ${PYSYS_CODE}
-      command: ["/bin/sh", "-c", "cd sysproduction/linux/scripts && run_daily_price_updates && python /opt/projects/pysystemtrade/syscontrol.monitor.py"]
+      command: ["/bin/sh", "-c", "cd sysproduction/linux/scripts && update_sampled_contracts"]
       depends_on:
         - ib_gateway
         - mongo_db
-        - stack_handler
+        - stack_and_capital_handler   # needed to avoid building same image twice
       volumes:
-        - ./echos/price_update:/home/echos
+        - ./echos:/home/echos
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.7
       stdin_open: true
       tty: true
+      tini: true
 
-    system:
+    daily_processes:
       image: pysystem_image
       container_name: system{NAME_SUFFIX}
       environment:
         IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
         PYSYS_CODE: ${PYSYS_CODE}
-      command: ["/bin/sh", "-c", "cd sysproduction/linux/scripts && run_systems && python /opt/projects/pysystemtrade/syscontrol.monitor.py"]
+      command: ["/bin/sh", "-c", "command_scripts/daily_processes.bash"]
       depends_on:
         - ib_gateway
         - mongo_db
-        - stack_handler
+        - stack_and_capital_handler   # needed to avoid building same image twice
       volumes:
-        - ./echos/system:/home/echos
+        - ./echos:/home/echos
+        - ./reports:/home/reports
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.8
       stdin_open: true
       tty: true
-
-    generator:
-      image: pysystem_image
-      container_name: generator{NAME_SUFFIX}
-      environment:
-        IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
-        PYSYS_CODE: ${PYSYS_CODE}
-      command: ["/bin/sh", "-c", "cd sysproduction/linux/scripts && run_strategy_order_generator && python /opt/projects/pysystemtrade/syscontrol.monitor.py"]
-      depends_on:
-        - ib_gateway
-        - mongo_db
-        - stack_handler
-      volumes:
-        - ./echos/generator:/home/echos
-      networks:
-        channel:
-          ipv4_address: ${IPV4_NETWORK_PART}0.9
-      stdin_open: true
-      tty: true
-
-    cleaner:
-      image: pysystem_image
-      container_name: cleaner{NAME_SUFFIX}
-      environment:
-        IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
-        PYSYS_CODE: ${PYSYS_CODE}
-      command: ["/bin/sh", "-c", "cd sysproduction/linux/scripts && run_cleaners && python /opt/projects/pysystemtrade/syscontrol.monitor.py"]
-      depends_on:
-        - ib_gateway
-        - mongo_db
-        - stack_handler
-      volumes:
-        - ./echos/cleaner:/home/echos
-      networks:
-        channel:
-          ipv4_address: ${IPV4_NETWORK_PART}0.10
-      stdin_open: true
-      tty: true
-
-    reports:
-      image: pysystem_image
-      container_name: reports{NAME_SUFFIX}
-      environment:
-        IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
-        PYSYS_CODE: ${PYSYS_CODE}
-      command: ["/bin/sh", "-c", "cd sysproduction/linux/scripts && run_cleaners && python /opt/projects/pysystemtrade/syscontrol.monitor.py"]
-      depends_on:
-        - ib_gateway
-        - mongo_db
-        - stack_handler
-      volumes:
-        - ./echos/reports:/home/echos
-        - ./reports:/home/reports
-      networks:
-        channel:
-          ipv4_address: ${IPV4_NETWORK_PART}0.11
-      stdin_open: true
-      tty: true
+      tini: true
 
     ib_gateway:
       build:
@@ -193,6 +119,7 @@ services:
         - mongo_conf:/data/configdb
         - ./db_backup:/backup
       command: sh -c "tar -cvf /backup/backup_db.tar /data/db; tar -cvf /backup/backup_conf.tar /data/configdb"
+      tini: true
 
     db_restore:
       image: alpine    
@@ -202,8 +129,7 @@ services:
         - mongo_conf:/data/configdb
         - ./db_backup:/backup
       command: sh -c "cd /data/ && tar -xvf /backup/backup_db.tar --strip 1; cd /data/ && tar -xvf /backup/backup_conf.tar --strip 1"
-
-
+      tini: true
 
 volumes:
   mongo_db:

@@ -46,13 +46,15 @@ RUN mkdir /opt/projects
 COPY --from=builder /opt/projects /opt/projects
 
 WORKDIR /opt/projects/pysystemtrade
+
+RUN mkdir command_scripts
+COPY ./command_scripts /opt/projects/pysystemtrade/command_scripts
+
 RUN pip install -e .
 
 RUN mkdir $ECHO_PATH
 RUN mkdir /home/backups
 RUN mkdir /home/csv_backup
 
-CMD ["echo", "Hello, world"]
-
-# will not be populated. Work around. (IPV4_NETWORK_PART needed in private_config.yaml)
+CMD ["/bin/bash", "-c", "tail -f /dev/null"]
 

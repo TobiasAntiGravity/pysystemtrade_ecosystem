@@ -1,5 +1,4 @@
 import time
-from datetime import datetime
 
 import docker
 
@@ -31,6 +30,7 @@ def wait_until_containers_has_finished(list_of_containers_to_finish: list, docke
         else:
             time.sleep(15)
 
+
 def run_container_and_wait_to_finish(container_name: str, docker_client: docker.client, name_suffix: str):
 
     ontainer_object = client.containers.get(container_id=container_name + name_suffix)
@@ -44,45 +44,71 @@ def run_container_and_wait_to_finish(container_name: str, docker_client: docker.
     wait_until_containers_has_finished([container_name + name_suffix], docker_client=docker_client)
 
 
+def daily_container_flow_management():
+    """Handles the daily start and stop of the different containers"""
+
+    container_sequence = ['stack_and_capital_handler', 'daily_']
+
+    for container_name in container_sequence:
+        run_container_and_wait_to_finish(container_name=container_name,
+                                         docker_client=client,
+                                         name_suffix=NAME_SUFFIX)
+
+
 def run_container_managment():
-    '''docker compose must create containers via docker compose create before script can run'''
+    """Main function for managing the pysystemtrade ecosystem containers. Note that;
+       docker compose must create containers via docker compose create before script can run
+    """
 
-    stack_container_object = client.containers.get(container_id="stack_handler" + NAME_SUFFIX)
+    mongo_container_object = client.containers.get(container_id="mongo_db" + NAME_SUFFIX)
 
-    if stack_container_object.status != 'running':
-        stack_container_object.start()
+    if mongo_container_object.status != 'running':
+        mongo_container_object.start()
 
-    capital_container_object = client.containers.get(container_id ="capital_update" + NAME_SUFFIX)
+    ib_gateway_container_object = client.containers.get(container_id ="ib_gateway" + NAME_SUFFIX)
 
-    if capital_container_object.status != 'running':
-        capital_container_object.start()
+    if ib_gateway_container_object.status != 'running':
+        ib_gateway_container_object.start()
 
-    #Find out when stack handler and capital update stops (process stop time from private_control_config passed)
-    wait_until_containers_has_finished(['stack_handler' + NAME_SUFFIX, 'capital_update' + NAME_SUFFIX],
-                                       docker_client=client)
+    daily_container_flow_management()
 
-    # hack to ensure that processes are started at the right time. Manually added the
-    # stack handler and capital update stop times from private_control_config
-    now = datetime.now()
-    if (now.hour == 19 and now.minute >= 45) or (now.hour > 19):
 
-        #continue starting containers with processes according to required sequence
-        container_sequence = ['price_update', 'system', 'generator', 'cleaner', 'db_backup']
 
-        for container_name in container_sequence:
-            run_container_and_wait_to_finish(container_name=container_name,
-                                             docker_client=client,
-                                             name_suffix=NAME_SUFFIX)
 
-    else:
-        #place holder for logger
-        print('Critical: something unexpected happened. Stack handler and capital update stopped before')
-        print('the defined stop time. Should be checked')
 
+
+
+
+
+
+
+
+
+
+
+
+#related to the container archetecture
+# todo: where does systems save it's results. Must be accessible for generator
+#  means must also persist through a stop and restart.
+# todo: backup should also do;
+#  csv dump (csv_backup_directory private_config.yaml)
+#  backtest store (backtest_store_directory private_config.yaml)
+# todo: echo_directory - should only be one echo directory - so that the cleaner can work as expectd.
+#  make sure the writing and reading prieveliges are correct ehre
+
+# todo: crontab does the output writing. Where to handle this if we are not using cron.
+
+# todo: find out; When script is run manually (instead of being run through cron) is it
+# running continously or closed after the day's work? - think it does not.
+
+# todo: catxh log output
+
+#related to the script
+# todo: daily function should rest when market is not open..
+# todo: have try catch on container runs
+# todo: logging should be implemented
+# todo: get NAME_SUFFIX from .env.
 # todo: move backup files to external storage after backup
 # todo: git save the reports.
-# todo: get NAME_SUFFIX from .env.
-# todo: logging should be implemented
-# todo: backup should also do csv dump.
 
 
