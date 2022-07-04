@@ -11,7 +11,7 @@ services:
           GIT_TOKEN: ${GIT_TOKEN}
           SCRIPT_PATH: ${SCRIPT_PATH}
           ECHO_PATH: ${ECHO_PATH}
-      container_name: stack_handler{NAME_SUFFIX}
+      container_name: stack_and_capital_handler${NAME_SUFFIX}
       restart: on-failure
       environment:
         IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
@@ -27,11 +27,11 @@ services:
           ipv4_address: ${IPV4_NETWORK_PART}0.4
       stdin_open: true
       tty: true
-      tini: true
+      init: true
 
     tester:
       image: pysystem_image
-      container_name: price_update{NAME_SUFFIX}
+      container_name: tester${NAME_SUFFIX}
       environment:
         IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
         PYSYS_CODE: ${PYSYS_CODE}
@@ -47,11 +47,11 @@ services:
           ipv4_address: ${IPV4_NETWORK_PART}0.7
       stdin_open: true
       tty: true
-      tini: true
+      init: true
 
     daily_processes:
       image: pysystem_image
-      container_name: system{NAME_SUFFIX}
+      container_name: daily_processes${NAME_SUFFIX}
       environment:
         IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
         PYSYS_CODE: ${PYSYS_CODE}
@@ -68,7 +68,7 @@ services:
           ipv4_address: ${IPV4_NETWORK_PART}0.8
       stdin_open: true
       tty: true
-      tini: true
+      init: true
 
     ib_gateway:
       build:
@@ -119,7 +119,7 @@ services:
         - mongo_conf:/data/configdb
         - ./db_backup:/backup
       command: sh -c "tar -cvf /backup/backup_db.tar /data/db; tar -cvf /backup/backup_conf.tar /data/configdb"
-      tini: true
+      init: true
 
     db_restore:
       image: alpine    
@@ -129,7 +129,7 @@ services:
         - mongo_conf:/data/configdb
         - ./db_backup:/backup
       command: sh -c "cd /data/ && tar -xvf /backup/backup_db.tar --strip 1; cd /data/ && tar -xvf /backup/backup_conf.tar --strip 1"
-      tini: true
+      init: true
 
 volumes:
   mongo_db:
