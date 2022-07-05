@@ -1,6 +1,20 @@
  # pysystemtrade_ecosystem
 
-docker ecosystem for pysystemtrade. Contains; 
+A dockerized pysystemtrade ecosystem. The daily pysystemtrade has been split into two different containers. 
+A container running the ib gateway. A mongodb container. A jupyter notebook container enabling interacive GUI access 
+to the data and the interactive scripts. The container workflow is managed by a python script, that starts and 
+stops containers 
+
+
+
+by a python script.  
+
+by starting and 
+
+
+how it differs from the standard implementation of pysystemtrade
+
+
 - container with pysystemtrade repo clone running. 
 - container with ib gateway running
 - container with mongodb running

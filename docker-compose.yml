@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
 
-    stack_and_capital_handler:
+  stack_and_capital_handler:
       image: pysystem_image
       build:
         context: ./pysystemtrade
@@ -10,7 +10,6 @@ services:
         args:
           GIT_TOKEN: ${GIT_TOKEN}
           SCRIPT_PATH: ${SCRIPT_PATH}
-          ECHO_PATH: ${ECHO_PATH}
       container_name: stack_and_capital_handler${NAME_SUFFIX}
       restart: on-failure
       environment:
@@ -20,8 +19,6 @@ services:
       depends_on:
         - ib_gateway
         - mongo_db
-      volumes:
-        - ./echos:/home/echos
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.4
@@ -29,19 +26,18 @@ services:
       tty: true
       init: true
 
-    daily_processes:
+  daily_processes:
       image: pysystem_image
       container_name: daily_processes{NAME_SUFFIX}
       environment:
         IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
         PYSYS_CODE: ${PYSYS_CODE}
-      command: ["/bin/bash", "-c", "command_scripts/daily_processes.bash"]
+      command: ["/bin/bash", "-c", "command_scripts/daily_processes_commands.bash"]
       depends_on:
         - ib_gateway
         - mongo_db
         - stack_and_capital_handler   # needed to avoid building same image twice
       volumes:
-        - ./echos:/home/echos
         - ./reports:/home/reports
       networks:
         channel:
@@ -50,12 +46,12 @@ services:
       tty: true
       init: true
 
-    ib_gateway:
+  ib_gateway:
       build:
         context: ./ib_gateway
         dockerfile: ./Dockerfile
       container_name: ib_gateway${NAME_SUFFIX}
-      restart: always
+      restart: on-failure
       ports:
         - "4002:4002"
         - "5900:5900"
@@ -66,10 +62,10 @@ services:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.3
 
-    mongo_db:
+  mongo_db:
       container_name: mongo_db${NAME_SUFFIX}
       image: mongo
-      restart: always
+      restart: on-failure
       volumes:
         - mongo_db:/data/db
         - mongo_conf:/data/configdb
@@ -77,22 +73,35 @@ services:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.2
 
-    ipython:
+  jupyter:
       build:
-        context: ./ipython
+        context: jupyter
         dockerfile: ./Dockerfile
         args:
           GIT_TOKEN: add_personal_access_token_here
-          ECHO_PATH: ${ECHO_PATH}
-      container_name: ipython${NAME_SUFFIX}
+      container_name: jupyter${NAME_SUFFIX}
       restart: always
       ports:
         - "8888:8888"
+      volumes:
+        - ./reports:/home/reports
+        - ./csv_backup:/home/csv_backup
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.6
-    
-    db_backup:
+
+  csv_backup:
+      profiles: ["csv_backup"]
+      image: pysystem_image
+      depends_on:
+        - stack_and_capital_handler   # needed to avoid building same image twice
+      volumes:
+        - ./csv_backup:/home/csv_backup
+      command: ["/bin/bash", "-c", "command_scripts/csv_backup_commands.bash"]
+      init: true
+
+  db_backup:
+      profiles: ["db_backup"]
       image: alpine
       volumes:
         - mongo_db:/data/db
@@ -101,7 +110,7 @@ services:
       command: sh -c "tar -cvf /backup/backup_db.tar /data/db; tar -cvf /backup/backup_conf.tar /data/configdb"
       init: true
 
-    db_restore:
+  db_restore:
       image: alpine    
       profiles: ["restore"]
       volumes:

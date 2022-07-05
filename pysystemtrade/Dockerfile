@@ -13,12 +13,10 @@ RUN git clone -b my_branch https://${GIT_TOKEN}:@github.com/GITUSERNAME/private_
 FROM python:3.8.12 as final_stage
 
 ARG SCRIPT_PATH=$SCRIPT_PATH
-ARG ECHO_PATH=$ECHO_PATH
 
 ENV IPV4_NETWORK_PART=$IPV4_NETWORK_PART
 ENV PYSYS_CODE=$PYSYS_CODE
 ENV SCRIPT_PATH=$SCRIPT_PATH
-ENV ECHO_PATH=$ECHO_PATH
 ENV PATH "$PATH:$SCRIPT_PATH"
 
 RUN apt-get update
@@ -52,8 +50,7 @@ COPY ./command_scripts /opt/projects/pysystemtrade/command_scripts
 
 RUN pip install -e .
 
-RUN mkdir $ECHO_PATH
-RUN mkdir /home/backups
+RUN mkdir /home/echos
 RUN mkdir /home/csv_backup
 
 CMD ["/bin/bash", "-c", "tail -f /dev/null"]
