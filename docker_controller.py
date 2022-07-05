@@ -1,7 +1,7 @@
 import time
 
 import docker
-
+from dotenv import dotenv_values
 
 def wait_until_containers_has_finished(list_of_containers_to_finish: list, docker_client: docker.client):
 
@@ -95,8 +95,11 @@ def run_daily_container_managment(docker_client: docker.client, name_suffix: str
 
 if __name__ == '__main__':
 
+    config = dotenv_values(".env")
+
+    NAME_SUFFIX = config("NAME_SUFFIX")
+
     client = docker.DockerClient(base_url='unix://var/run/docker.sock')
-    NAME_SUFFIX = ""
 
     run_daily_container_managment(docker_client=client, name_suffix=NAME_SUFFIX)
 
@@ -113,14 +116,11 @@ if __name__ == '__main__':
 
 # todo: note in readme: define size constraint of docker logs - explain where to set.
 
-# todo: Assume that When script is run manually (instead of being run through cron) is it
-# running continously or closed after the day's work? - think it does not.
 
 #related to the script
 # todo: daily function should rest when market is not open..
 # todo: have try catch on container runs
 # todo: logging should be implemented
-# todo: get NAME_SUFFIX from .env.
 # todo: move backup files to external storage after backup
 # todo: git save the reports.
 
