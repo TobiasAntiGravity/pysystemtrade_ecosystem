@@ -1,4 +1,5 @@
 import time
+import datetime as datetime
 
 import docker
 from dotenv import dotenv_values
@@ -74,23 +75,29 @@ def daily_sequence_flow_management( docker_client: docker.client, name_suffix: s
                                      name_suffix=name_suffix)
 
 
-def run_daily_container_managment(docker_client: docker.client, name_suffix: str):
+def run_daily_container_managment(docker_client: docker.client, name_suffix: str,
+                                  weekday_start: int, weekday_end: int, stop_hour: int):
     """Main function for managing the pysystemtrade ecosystem containers. Note that;
        docker compose must create containers via docker compose create before script can run
     """
 
     while True:
-        mongo_container_object = docker_client.containers.get(container_id="mongo_db" + name_suffix)
 
-        if mongo_container_object.status != 'running':
-            mongo_container_object.start()
+        now = datetime.now()
 
-        ib_gateway_container_object = docker_client.containers.get(container_id ="ib_gateway" + name_suffix)
+        if (now.isoweekday() >= weekday_start) and (now.isoweekday() <= weekday_end and now.hour < stop_hour):
 
-        if ib_gateway_container_object.status != 'running':
-            ib_gateway_container_object.start()
+            mongo_container_object = docker_client.containers.get(container_id="mongo_db" + name_suffix)
 
-        daily_sequence_flow_management(docker_client=docker_client, name_suffix=name_suffix)
+            if mongo_container_object.status != 'running':
+                mongo_container_object.start()
+
+            ib_gateway_container_object = docker_client.containers.get(container_id ="ib_gateway" + name_suffix)
+
+            if ib_gateway_container_object.status != 'running':
+                ib_gateway_container_object.start()
+
+            daily_sequence_flow_management(docker_client=docker_client, name_suffix=name_suffix)
 
 
 if __name__ == '__main__':
@@ -98,27 +105,20 @@ if __name__ == '__main__':
     config = dotenv_values(".env")
 
     NAME_SUFFIX = config("NAME_SUFFIX")
+    WORKFLOW_WEEKDAY_START = config("WORKFLOW_WEEKDAY_START")
+    WORKFLOW_WEEKDAY_END = config("WORKFLOW_WEEKDAY_END")
+    HOUR_TO_STOP_WORKFLOW_ON_END_WEEKDAY = config("HOUR_TO_STOP_WORKFLOW_ON_END_WEEKDAY")
 
     client = docker.DockerClient(base_url='unix://var/run/docker.sock')
 
-    run_daily_container_managment(docker_client=client, name_suffix=NAME_SUFFIX)
-
-
-
-
-#related to the container archetecture
-# todo: Check where does systems save backtest results?. (backtest_store_directory private_config.yaml)
-#  Does this have to be be accessible for generator?
-
-# todo: Remember to define (csv_backup_directory private_config.yaml) in private_config.yaml
-
-#  todo: note in readme: make sure the writing and reading prieveliges of command_scripts are correct.
-
-# todo: note in readme: define size constraint of docker logs - explain where to set.
+    run_daily_container_managment(docker_client=client,
+                                  name_suffix=NAME_SUFFIX,
+                                  weekday_start=WORKFLOW_WEEKDAY_START,
+                                  weekday_end=WORKFLOW_WEEKDAY_END,
+                                  stop_hour=HOUR_TO_STOP_WORKFLOW_ON_END_WEEKDAY)
 
 
 #related to the script
-# todo: daily function should rest when market is not open..
 # todo: have try catch on container runs
 # todo: logging should be implemented
 # todo: move backup files to external storage after backup

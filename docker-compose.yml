@@ -39,6 +39,7 @@ services:
         - stack_and_capital_handler   # needed to avoid building same image twice
       volumes:
         - ./reports:/home/reports
+        - ./backtests:/home/backtests
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.8
@@ -86,6 +87,7 @@ services:
       volumes:
         - ./reports:/home/reports
         - ./csv_backup:/home/csv_backup
+        - ./backtests:/home/backtests
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.6
