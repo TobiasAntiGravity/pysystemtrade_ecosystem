@@ -28,7 +28,7 @@ services:
 
   daily_processes:
       image: pysystem_image
-      container_name: daily_processes{NAME_SUFFIX}
+      container_name: daily_process${NAME_SUFFIX}
       environment:
         IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
         PYSYS_CODE: ${PYSYS_CODE}
