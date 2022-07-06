@@ -52,7 +52,7 @@ services:
         context: ./ib_gateway
         dockerfile: ./Dockerfile
       container_name: ib_gateway${NAME_SUFFIX}
-      restart: on-failure
+      restart: always
       ports:
         - "4002:4002"
         - "5900:5900"
