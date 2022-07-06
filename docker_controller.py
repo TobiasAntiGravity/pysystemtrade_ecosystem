@@ -100,11 +100,11 @@ def daily_sequence_flow_management( docker_client: docker.client,
                                      docker_client=docker_client,
                                      name_suffix=name_suffix)
 
-    backup_csv_files(samba_user=samba_user,
-                     samba_password=samba_password,
-                     samba_share=samba_share,
-                     samba_server_ip=samba_server_ip,
-                     path_local_backup_folder=path_local_backup_folder)
+#    backup_csv_files(samba_user=samba_user,
+#                     samba_password=samba_password,
+#                     samba_share=samba_share,
+#                     samba_server_ip=samba_server_ip,
+#                     path_local_backup_folder=path_local_backup_folder)
 
 
 def run_daily_container_management(docker_client: docker.client,
@@ -157,11 +157,10 @@ if __name__ == '__main__':
     WORKFLOW_WEEKDAY_START = config("WORKFLOW_WEEKDAY_START")
     WORKFLOW_WEEKDAY_END = config("WORKFLOW_WEEKDAY_END")
     HOUR_TO_STOP_WORKFLOW_ON_END_WEEKDAY = config("HOUR_TO_STOP_WORKFLOW_ON_END_WEEKDAY")
-    samba_user = env_dict['SAMBA_USER']
-    samba_password =  env_dict['SAMBA_PASSWORD']
-    netbios_name = 'placeholder' # netbios name of remote server
-    samba_share = env_dict['SAMBA_SHARE'] # share name of remote server
-    samba_server_ip = env_dict['SAMBA_SERVER_IP']
+    samba_user = config['SAMBA_USER']
+    samba_password = config['SAMBA_PASSWORD']
+    samba_share = config['SAMBA_SHARE']         # share name of remote server
+    samba_server_ip = config['SAMBA_SERVER_IP']
 
     client = docker.DockerClient(base_url='unix://var/run/docker.sock')
 
@@ -169,7 +168,12 @@ if __name__ == '__main__':
                                    name_suffix=NAME_SUFFIX,
                                    weekday_start=WORKFLOW_WEEKDAY_START,
                                    weekday_end=WORKFLOW_WEEKDAY_END,
-                                   stop_hour=HOUR_TO_STOP_WORKFLOW_ON_END_WEEKDAY)
+                                   stop_hour=HOUR_TO_STOP_WORKFLOW_ON_END_WEEKDAY,
+                                   samba_user=samba_user,
+                                   samba_password=samba_password,
+                                   samba_share=samba_share,
+                                   samba_server_ip=samba_server_ip,
+                                   path_local_backup_folder=path_local_backup_folder)
 
 
 # todo: should implement surveilance on disk usage / docker cleaning if necessary
