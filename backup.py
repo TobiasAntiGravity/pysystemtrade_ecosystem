@@ -1,11 +1,14 @@
-from smb.SMBConnection import SMBConnections
-from smb.base import SharedFile
 import os
 import tarfile
 import subprocess
 import datetime as datetime
+import logging
 from pathlib import Path
 from typing import List
+
+from smb.SMBConnection import SMBConnections
+from smb.base import SharedFile
+from smb.smb_structs import OperationFailure
 
 client = subprocess.Popen(['hostname'], stdout=subprocess.PIPE).communicate()[0].strip()
 
@@ -17,21 +20,30 @@ class SmbClient(object):
         self.password = password
         self.sharename = sharename
 
-    def connect(self):
+    def connect(self) -> bool:
 
         self.server = SMBConnection(self.username,
                                     self.password,
                                     client,
                                     use_ntlm_v2=True)
-        self.server.connect(self.ip, 139)
+        success = self.server.connect(self.ip, 139)
+
+        return success
 
     def upload(self, file_path: Path):
+        """uploads local file to samba share"""
 
         with open(str(file_path.resolve()), 'rb') as data:
             file = '/' + file_path.name
-            self.server.storeFile(self.sharename, file, data)
 
-        print("file has been uploaded")
+        try:
+            bytes_uploaded = self.server.storeFile(self.sharename, file, data)
+
+        except OperationFailure as exeption:
+            logging.exception(f'Exception occured, because of read failure according to documentation')
+
+        else:
+            logging.debug(f"{bytes_uploaded} bytes of {file} uploaded to samba")
 
     def download(self, file):
 
@@ -42,13 +54,16 @@ class SmbClient(object):
 
     def delete(self, file):
         """remove file from remote share"""
+
         file = '/' + file
         self.server.deleteFiles(self.sharename, file)
+        logging.debug(f'should have deleted file {str(file_path)}')
 
     def get_list_of_files_on_share(self, subfolder: str) -> List[SharedFile]:
         """get list of files of remote share"""
 
         file_list = self.server.listPath(self.sharename, '/' + subfolder)
+        logging.debug(f'Retrieved list ')
         return file_list
 
     def list_files_not_x_most_recent(self, file_list : List[SharedFile], threshold: int) -> List[SharedFile]:
@@ -62,7 +77,10 @@ class SmbClient(object):
         sorted_dict = dict(sorted(file_creation_dict.items(), key=lambda item: item[1], reverse=True))
 
         sorted_file_name_list = sorted_dict.keys()
+        logging.debug(f'all backup files on share; {sorted_file_name_list}')
+
         not_most_recent_files = sorted_file_name_list[threshold - 1:]
+        logging.debug(f'Files to be deleted from share; {not_most_recent_files}')
 
         return not_most_recent_files
 
@@ -75,36 +93,35 @@ class SmbClient(object):
 
         for file in list_of_files_to_delete:
             self.delete(file.filename)
+            logging.info(f'deleted {file.filename} from samba share, subfolder {subfolder}')
 
 
-def list_csv_files_to_backup(path_to_local_backup_dir: Path) -> List[Path]:
-    """Finds all .csv files in the given folder (non-recursively)"""
-
-    files_to_backup_list = []
-
-    for file_path in path_to_local_backup_dir.glob("*.csv"):
-        files_to_backup_list.append(file_path)
-
-    return files_to_backup_list
-
-
-def make_tarfile(files_to_tar_list: List[Path]) -> Path:
+def make_tarfile(path_to_local_backup_dir: Path) -> Path:
+    """Recursively adds all files in passed folder to tar file. Retursn path to created file,
+       tarfile is stored in the local backup directory. Will be deleted before new tar file is made
+    """
 
     backup_time = datetime.now().strftime("%Y-%m%-d %H:%M:%S")
     tar_file_name = f'csv_backup_{backup_time}.tar.gz'
-    tar_path = Path(files_to_tar_list[0].parent, tar_file_name)
+    tar_path = Path(path_to_local_backup_dir, tar_file_name)
 
     with tarfile.open(str(tar_path), "w:gz") as tar:
-        for file_path in files_to_tar_list:
-            tar.add(str(file_path))
+        tar.add(str(path_to_local_backup_dir, recursive=True))
+            logging.info(f'file added to tar {str(file_path)}')
 
     return tar_file_name
 
 
 def delete_old_tar_files(path_to_local_backup_dir: Path):
 
-    for file_path in path_to_local_backup_dir.glob("*.tar.gz"):
-            file_path.unlink()
+    if len(list(path_to_local_backup_dir.glob('*'))) != 0:
+
+        for file_path in path_to_local_backup_dir.glob("*.tar.gz"):
+                file_path.unlink()
+                logging.info(f'Old file deleted {str(file_path)}')
+
+    else:
+        logging.info(f'There were no files to be deleted')
 
 
 def backup_csv_files(samba_user: str,
@@ -115,23 +132,24 @@ def backup_csv_files(samba_user: str,
 
     delete_old_tar_files(path_to_local_backup_dir=path_local_backup_folder)
 
-    files_to_backup = list_csv_files_to_backup(path_local_backup_folder)
-
-    if len(files_to_backup) != 0:
-        path_to_tarfile = make_tarfile(files_to_tar_list=files_to_backup)
+    path_to_tarfile = make_tarfile(path_to_local_backup_dir=path_local_backup_folder)
 
     smb = SmbClient(ip=samba_server_ip,
                     username=samba_user,
                     password=samba_password,
                     sharename=samba_share)
-    smb.connect()
 
-    smb.upload(path_to_tarfile)
-    smb.delete_file_not_x_most_recent(subfolder='/csv_backup', threshold=5)
+    if smb.connect():
 
-    # delete all csv files backed up
-    for file in files_to_backup:
-        file.unlink()
+        smb.upload(path_to_tarfile)
+        smb.delete_file_not_x_most_recent(subfolder='/csv_backup', threshold=5)
+
+        # delete all csv files backed up
+        for file in files_to_backup:
+            file.unlink()
+
+    else:
+        logging.warning('failed to connect to samba share, could not move to external storage')
 
 
 if __name__ == '__main__':
