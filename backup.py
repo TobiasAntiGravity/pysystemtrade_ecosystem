@@ -25,11 +25,14 @@ class SmbClient(object):
 
     def connect(self) -> bool:
 
+        logging.debug(f'user: {self.username}, pass: {self.password}, remote_name: {self.remote_name}, ip: {self.ip}')
+
         self.server = SMBConnection(username=self.username,
                                     password=self.password,
                                     my_name=client,
                                     remote_name=self.remote_name,
-                                    use_ntlm_v2=True)
+                                    use_ntlm_v2=False)
+
         success = self.server.connect(self.ip, 139)
 
         return success
