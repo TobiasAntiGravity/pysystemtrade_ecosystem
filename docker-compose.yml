@@ -120,6 +120,10 @@ services:
       image: pysystem_image
       depends_on:
         - stack_and_capital_handler   # needed to avoid building same image twice
+        - mongo_db
+      networks:
+        channel:
+          ipv4_address: ${IPV4_NETWORK_PART}0.7
       volumes:
         - ./csv_backup:/home/csv_backup
       command: ["/bin/bash", "-c", "command_scripts/csv_backup_commands.bash"]
