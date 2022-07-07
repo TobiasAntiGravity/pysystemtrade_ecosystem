@@ -59,13 +59,14 @@ Table of Contents
     *iii)`GIT_TOKEN` is an environment variable set in the `docker-compose.yml` file - see the Parameterization/docker-compose.yml section below. Only relevant if repo is in github and using personal access token*
 
 4) Parameterize project see [Parameterization](#Parameterization) section below  
-5) To build the images; In the command line, while in the repo root folder, run following command; \
+5) Before building images, make sure that file privelieges for the repo is not too restrictive. Will result in a failed build.  
+6) To build the images; In the command line, while in the repo root folder, run following command; \
 `docker compose build`
-6) To create the containers without starting them, run the following; \
+7) To create the containers without starting them, run the following; \
 `docker compose create --force-recreate`
-7) Start jupyter container, (this will also start the mongodb container, and the ib gateway); \
+8) Start jupyter container, (this will also start the mongodb container, and the ib gateway); \
 `docker compose up jupyter`
-8) Doing the inital setup of pysystemtrade can be done either through jupyter notebooks. (Notebooks will then have to be made of course), or 
+9) Doing the inital setup of pysystemtrade can be done either through jupyter notebooks. (Notebooks will then have to be made of course), or 
 in the command line of the jupyter container. The setup entails populating the databases, set total capital, set position limits et cetera, 
 as required and described in the pysystemtrade project. To access the jupyter container command line;
 `docker exec -it jupyter /bin/bash` \
