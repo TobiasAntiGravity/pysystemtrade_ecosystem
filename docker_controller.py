@@ -92,7 +92,7 @@ def daily_sequence_flow_management( docker_client: docker.client,
 
     git_commit_and_push_reports()
 
-    stop_container(container_name='mongo_db' + NAME_SUFFIX,
+    stop_container(container_name='mongo_db' + name_suffix,
                    docker_client=docker_client,
                    name_suffix=name_suffix)
 
