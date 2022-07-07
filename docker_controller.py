@@ -125,7 +125,7 @@ def run_daily_container_management(docker_client: docker.client,
 
         now = datetime.now()
 
-        if (now.isoweekday() >= int(weekday_start)) and (now.isoweekday() <= int(weekday_end) and now.hour < int(stop_hour)):
+        if (now.isoweekday() >= int(weekday_start)) and ((now.isoweekday() <= int(weekday_end) and now.hour < int(stop_hour))):
 
             mongo_container_object = docker_client.containers.get(container_id="mongo_db" + name_suffix)
 
