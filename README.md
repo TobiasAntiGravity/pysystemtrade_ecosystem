@@ -144,7 +144,6 @@ Used to separate the weekend, when pysystemtrade does not need to run, and the w
 (`docker_controller.py`) during the weekend. Can be set to a custom time, default should match with times in pysystemtrade's crontab example. 
 Should be set as an integer between 1 (monday) and 7 (sunday)
 
-
 `WORKFLOW_WEEKDAY_END`
 
 Used to separate the weekend, when pysystemtrade does not need to run, and the work week. Used by the python container managment script 
@@ -178,10 +177,29 @@ and could therefore not be used
 Echo files are not used in this ecosystem. The reason being that stdout is captured and stored by docker logs, 
 instead of the echo specification in crontab. This is a consequence of not being able to run Crontab - as explained above.
 
+Log clean up is done by docker itself, according to the specifications declared under each service (container) in `the docker-compose.yml` file.
+Example from the stack_and_capital_handler service;
+```      
+      logging:
+        options:
+          max-size: "10m"
+          max-file: "3" 
+```
+This specifies that max size of a json log file is 10 Mb and max number of log files are 3. 
+
+Logs can be viewed with the following command; \
+`docker compose Logs "service name as per docker-compose.yml"`
+
+A grep filter command that can come in handy is; \
+`docker compose  logs daily_processes --until 2022-07-06T23:59:00 2>&1 | grep -v "because Previous process still running"`
+
+
 ### Monitor not running
+This is a continous process, and is therefore not started in the pysystemtrade containers. Might look into adding a separate 
+container where monitor can run from, as per possibility described in pysystemtrade documentation.  
 
 ### Backup of database
-Not done via pysystemtrade, but done as per best practice described for the mongodb docker image. 
+Not done via pysystemtrade, but done as per best practice described for the mongodb docker image. Saved on host machine, in `db_backup` folder under this repo.
 
 ## About Jupyter
 Address to jupyter's web UI is "local ip of docker host":"port number" (8888 by default) The root folder is the root folder of the private pysystemtrade repo. 
@@ -211,7 +229,7 @@ For the below commands to work; a directory named `backup` must be located in th
 
 - Run the temporary backup container;\
 \
-`docker compose run --rm db-backup`\
+`docker compose run --rm db_backup`\
 \
 *--rm ensures that the container is deleted after run is completed*\
 \
@@ -234,7 +252,7 @@ the new volumes with the backup data should be created before the mongo containe
 2) Containers consuming the mongodb volumes should be removed, along with removal of old volumes 
 
 3) Run the  container that uploads the backup into the db volume;\
-`docker compose run --rm db-restore`
+`docker compose run --rm db_restore`
 
 4) Start the compose environment
 `docker compose up --build -d`
