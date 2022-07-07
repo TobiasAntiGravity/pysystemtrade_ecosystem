@@ -133,6 +133,7 @@ def backup_csv_files(samba_user: str,
                      samba_password: str,
                      samba_share: str,
                      samba_server_ip: str,
+                     samba_remote_name: str,
                      path_local_backup_folder: Path=Path('csv_backup')):
 
     delete_old_tar_files(path_to_local_backup_dir=path_local_backup_folder)
@@ -142,6 +143,7 @@ def backup_csv_files(samba_user: str,
     smb = SmbClient(ip=samba_server_ip,
                     username=samba_user,
                     password=samba_password,
+                    remote_name=samba_remote_name,
                     sharename=samba_share)
 
     if smb.connect():
@@ -173,6 +175,7 @@ if __name__ == '__main__':
                      samba_password=samba_password,
                      samba_share=samba_share,
                      samba_server_ip=samba_server_ip,
+                     samba_remote_name=samba_remote_name,
                      path_local_backup_folder=path_local_backup_folder)
 
 
