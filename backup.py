@@ -5,7 +5,7 @@ import logging
 from pathlib import Path
 from typing import List
 
-from smb.SMBConnection import SMBConnections
+from smb.SMBConnection import SMBConnection
 from smb.base import SharedFile
 from smb.smb_structs import OperationFailure
 from dotenv import dotenv_values
