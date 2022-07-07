@@ -104,6 +104,9 @@ services:
         - ./reports:/home/reports
         - ./csv_backup:/home/csv_backup
         - ./backtests:/home/backtests
+      depends_on:
+        - ib_gateway
+        - mongo_db
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.6
