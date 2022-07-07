@@ -10,7 +10,7 @@ from smb.base import SharedFile
 from smb.smb_structs import OperationFailure
 from dotenv import dotenv_values
 
-logging.basicConfig(filename='backup.log', encoding='utf-8', level=logging.DEBUG)
+logging.basicConfig(filename='backup.log', level=logging.DEBUG)
 
 client = subprocess.Popen(['hostname'], stdout=subprocess.PIPE).communicate()[0].strip()
 
