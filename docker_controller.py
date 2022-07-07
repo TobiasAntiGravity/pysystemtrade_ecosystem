@@ -1,8 +1,13 @@
 import time
 import datetime as datetime
+from pathlib import Path
 
 import docker
 from dotenv import dotenv_values
+import git
+
+from backup import backup_csv_files
+
 
 def wait_until_containers_has_finished(list_of_containers_to_finish: list, docker_client: docker.client):
 
@@ -52,7 +57,26 @@ def stop_container(container_name: str, docker_client: docker.client, name_suffi
     wait_until_containers_has_finished([container_name + name_suffix], docker_client=docker_client)
 
 
-def daily_sequence_flow_management( docker_client: docker.client, name_suffix: str):
+def git_commit_and_push_reports():
+
+    reports_repo = git.Repo('./reports')
+    now = datetime.now()
+
+    if reports_repo.is_dirty(untracked_files=True):
+
+        reports_repo.git.add(all=True)
+        reports_repo.index.commit(f'Auto commit {now.strftime("%d%m%Y %H:%M:%S")}')
+        reports_repo.remotes.origin.push()
+
+
+def daily_sequence_flow_management( docker_client: docker.client,
+                                    name_suffix: str,
+                                    samba_user: str,
+                                    samba_password: str,
+                                    samba_share: str,
+                                    samba_server_ip: str,
+                                    path_local_backup_folder: Path = Path('csv_backup')):
+
     """Handles the daily start and stop of the different containers"""
 
     container_sequence = ['stack_and_capital_handler', 'daily_processes']
@@ -66,6 +90,8 @@ def daily_sequence_flow_management( docker_client: docker.client, name_suffix: s
                                      docker_client=docker_client,
                                      name_suffix=name_suffix)
 
+    git_commit_and_push_reports()
+
     stop_container(container_name='mongo_db' + NAME_SUFFIX,
                    docker_client=docker_client,
                    name_suffix=name_suffix)
@@ -74,9 +100,23 @@ def daily_sequence_flow_management( docker_client: docker.client, name_suffix: s
                                      docker_client=docker_client,
                                      name_suffix=name_suffix)
 
+#    backup_csv_files(samba_user=samba_user,
+#                     samba_password=samba_password,
+#                     samba_share=samba_share,
+#                     samba_server_ip=samba_server_ip,
+#                     path_local_backup_folder=path_local_backup_folder)
 
-def run_daily_container_managment(docker_client: docker.client, name_suffix: str,
-                                  weekday_start: int, weekday_end: int, stop_hour: int):
+
+def run_daily_container_management(docker_client: docker.client,
+                                   name_suffix: str,
+                                   weekday_start: int,
+                                   weekday_end: int,
+                                   stop_hour: int,
+                                   samba_user: str,
+                                   samba_password: str,
+                                   samba_share: str,
+                                   samba_server_ip: str,
+                                   path_local_backup_folder: Path = Path('csv_backup')):
     """Main function for managing the pysystemtrade ecosystem containers. Note that;
        docker compose must create containers via docker compose create before script can run
     """
@@ -97,7 +137,16 @@ def run_daily_container_managment(docker_client: docker.client, name_suffix: str
             if ib_gateway_container_object.status != 'running':
                 ib_gateway_container_object.start()
 
-            daily_sequence_flow_management(docker_client=docker_client, name_suffix=name_suffix)
+            daily_sequence_flow_management(docker_client=docker_client,
+                                           name_suffix=name_suffix,
+                                           samba_user=samba_user,
+                                           samba_password=samba_password,
+                                           samba_share=samba_share,
+                                           samba_server_ip=samba_server_ip,
+                                           path_local_backup_folder=path_local_backup_folder)
+
+        else:
+            time.sleep(secs=60)
 
 
 if __name__ == '__main__':
@@ -108,20 +157,30 @@ if __name__ == '__main__':
     WORKFLOW_WEEKDAY_START = config("WORKFLOW_WEEKDAY_START")
     WORKFLOW_WEEKDAY_END = config("WORKFLOW_WEEKDAY_END")
     HOUR_TO_STOP_WORKFLOW_ON_END_WEEKDAY = config("HOUR_TO_STOP_WORKFLOW_ON_END_WEEKDAY")
+    samba_user = config['SAMBA_USER']
+    samba_password = config['SAMBA_PASSWORD']
+    samba_share = config['SAMBA_SHARE']         # share name of remote server
+    samba_server_ip = config['SAMBA_SERVER_IP']
 
     client = docker.DockerClient(base_url='unix://var/run/docker.sock')
 
-    run_daily_container_managment(docker_client=client,
-                                  name_suffix=NAME_SUFFIX,
-                                  weekday_start=WORKFLOW_WEEKDAY_START,
-                                  weekday_end=WORKFLOW_WEEKDAY_END,
-                                  stop_hour=HOUR_TO_STOP_WORKFLOW_ON_END_WEEKDAY)
+    run_daily_container_management(docker_client=client,
+                                   name_suffix=NAME_SUFFIX,
+                                   weekday_start=WORKFLOW_WEEKDAY_START,
+                                   weekday_end=WORKFLOW_WEEKDAY_END,
+                                   stop_hour=HOUR_TO_STOP_WORKFLOW_ON_END_WEEKDAY,
+                                   samba_user=samba_user,
+                                   samba_password=samba_password,
+                                   samba_share=samba_share,
+                                   samba_server_ip=samba_server_ip,
+                                   path_local_backup_folder=path_local_backup_folder)
 
 
-#related to the script
-# todo: have try catch on container runs
+# todo: should implement surveilance on disk usage / docker cleaning if necessary
+# todo: have to implement error handling accross the script
 # todo: logging should be implemented
-# todo: move backup files to external storage after backup
-# todo: git save the reports.
+# todo: move backup files to external storage after backup;
+# - csv_backup - either overwrite files, or have multiple days backup
+# - db_backup. Single couple of days backup.
 
 
