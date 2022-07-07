@@ -10,6 +10,8 @@ from smb.SMBConnection import SMBConnections
 from smb.base import SharedFile
 from smb.smb_structs import OperationFailure
 
+logging.basicConfig(filename='backup.log', encoding='utf-8', level=logging.DEBUG)
+
 client = subprocess.Popen(['hostname'], stdout=subprocess.PIPE).communicate()[0].strip()
 
 
@@ -153,6 +155,21 @@ def backup_csv_files(samba_user: str,
 
 
 if __name__ == '__main__':
+
+    config = dotenv_values(".env")
+
+    samba_user = config['SAMBA_USER']
+    samba_password = config['SAMBA_PASSWORD']
+    samba_share = config['SAMBA_SHARE']         # share name of remote server
+    samba_server_ip = config['SAMBA_SERVER_IP']
+
+    path_local_backup_folder = Path('csv_backup/')
+
+    backup_csv_files(samba_user=samba_user,
+                     samba_password=samba_password,
+                     samba_share=samba_share,
+                     samba_server_ip=samba_server_ip,
+                     path_local_backup_folder=path_local_backup_folder)
 
 
 # todo: implement error handling
