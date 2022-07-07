@@ -162,9 +162,11 @@ if __name__ == '__main__':
     samba_share = config['SAMBA_SHARE']         # share name of remote server
     samba_server_ip = config['SAMBA_SERVER_IP']
 
-    client = docker.DockerClient(base_url='unix://var/run/docker.sock')
+    path_local_backup_folder = Path('/csv_backup')
 
-    run_daily_container_management(docker_client=client,
+    docker_client = docker.DockerClient(base_url='unix://var/run/docker.sock')
+
+    run_daily_container_management(docker_client=docker_client,
                                    name_suffix=NAME_SUFFIX,
                                    weekday_start=WORKFLOW_WEEKDAY_START,
                                    weekday_end=WORKFLOW_WEEKDAY_END,
@@ -177,6 +179,7 @@ if __name__ == '__main__':
 
 
 # todo: should implement surveilance on disk usage / docker cleaning if necessary
+# todo: implement db backup handling.
 # todo: have to implement error handling accross the script
 # todo: logging should be implemented
 # todo: move backup files to external storage after backup;
