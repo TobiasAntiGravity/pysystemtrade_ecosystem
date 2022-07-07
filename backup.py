@@ -1,6 +1,6 @@
 import tarfile
 import subprocess
-import datetime as datetime
+from datetime import datetime
 import logging
 from pathlib import Path
 from typing import List
@@ -108,7 +108,7 @@ def make_tarfile(path_to_local_backup_dir: Path) -> Path:
     tar_path = Path(path_to_local_backup_dir, tar_file_name)
 
     with tarfile.open(str(tar_path), "w:gz") as tar:
-        tar.add(str(path_to_local_backup_dir, recursive=True))
+        tar.add(str(path_to_local_backup_dir), recursive=True)
 
     logging.info(f'added local backup director to tar archive and created file {tar_path}')
 
