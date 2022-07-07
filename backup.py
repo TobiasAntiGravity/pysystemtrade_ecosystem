@@ -1,4 +1,3 @@
-import os
 import tarfile
 import subprocess
 import datetime as datetime
@@ -9,6 +8,7 @@ from typing import List
 from smb.SMBConnection import SMBConnections
 from smb.base import SharedFile
 from smb.smb_structs import OperationFailure
+from dotenv import dotenv_values
 
 logging.basicConfig(filename='backup.log', encoding='utf-8', level=logging.DEBUG)
 
@@ -59,7 +59,7 @@ class SmbClient(object):
 
         file = '/' + file
         self.server.deleteFiles(self.sharename, file)
-        logging.debug(f'should have deleted file {str(file_path)}')
+        logging.debug(f'should have deleted file {str(file)}')
 
     def get_list_of_files_on_share(self, subfolder: str) -> List[SharedFile]:
         """get list of files of remote share"""
@@ -109,7 +109,8 @@ def make_tarfile(path_to_local_backup_dir: Path) -> Path:
 
     with tarfile.open(str(tar_path), "w:gz") as tar:
         tar.add(str(path_to_local_backup_dir, recursive=True))
-            logging.info(f'file added to tar {str(file_path)}')
+
+    logging.info(f'added local backup director to tar archive and created file {tar_path}')
 
     return tar_file_name
 
@@ -146,8 +147,8 @@ def backup_csv_files(samba_user: str,
         smb.upload(path_to_tarfile)
         smb.delete_file_not_x_most_recent(subfolder='/csv_backup', threshold=5)
 
-        # delete all csv files backed up
-        for file in files_to_backup:
+        # delete all csv files backed up recursively.
+        for file in path_local_backup_folder.glob('**/*.csv'):
             file.unlink()
 
     else:
