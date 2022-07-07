@@ -25,6 +25,10 @@ services:
       stdin_open: true
       tty: true
       init: true
+      logging:
+        options:
+          max-size: "10m"
+          max-file: "3"
 
   daily_processes:
       image: pysystem_image
@@ -46,6 +50,10 @@ services:
       stdin_open: true
       tty: true
       init: true
+      logging:
+        options:
+          max-size: "10m"
+          max-file: "3"
 
   ib_gateway:
       build:
@@ -62,6 +70,10 @@ services:
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.3
+      logging:
+        options:
+          max-size: "1m"
+          max-file: "2"
 
   mongo_db:
       container_name: mongo_db${NAME_SUFFIX}
@@ -73,6 +85,10 @@ services:
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.2
+      logging:
+        options:
+          max-size: "5m"
+          max-file: "3"
 
   jupyter:
       build:
@@ -91,6 +107,10 @@ services:
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.6
+      logging:
+        options:
+          max-size: "200k"
+          max-file: "1"
 
   csv_backup:
       profiles: ["csv_backup"]
@@ -101,6 +121,10 @@ services:
         - ./csv_backup:/home/csv_backup
       command: ["/bin/bash", "-c", "command_scripts/csv_backup_commands.bash"]
       init: true
+      logging:
+        options:
+          max-size: "200k"
+          max-file: "1"
 
   db_backup:
       profiles: ["db_backup"]
@@ -111,6 +135,10 @@ services:
         - ./db_backup:/backup
       command: sh -c "tar -cvf /backup/backup_db.tar /data/db; tar -cvf /backup/backup_conf.tar /data/configdb"
       init: true
+      logging:
+        options:
+          max-size: "200k"
+          max-file: "1"
 
   db_restore:
       image: alpine    
@@ -121,6 +149,10 @@ services:
         - ./db_backup:/backup
       command: sh -c "cd /data/ && tar -xvf /backup/backup_db.tar --strip 1; cd /data/ && tar -xvf /backup/backup_conf.tar --strip 1"
       init: true
+      logging:
+        options:
+          max-size: "200k"
+          max-file: "1"
 
 volumes:
   mongo_db:
