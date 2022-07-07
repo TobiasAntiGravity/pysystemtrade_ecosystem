@@ -105,7 +105,7 @@ def make_tarfile(path_to_local_backup_dir: Path) -> Path:
        tarfile is stored in the local backup directory. Will be deleted before new tar file is made
     """
 
-    backup_time = datetime.now().strftime("%Y-%m%-d %H:%M:%S")
+    backup_time = datetime.now().strftime("%Y_%m%_d_%H_%M_%S")
     tar_file_name = f'csv_backup_{backup_time}.tar.gz'
     tar_path = Path(path_to_local_backup_dir, tar_file_name)
 
