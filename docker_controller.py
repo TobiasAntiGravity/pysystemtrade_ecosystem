@@ -146,7 +146,7 @@ def run_daily_container_management(docker_client: docker.client,
                                            path_local_backup_folder=path_local_backup_folder)
 
         else:
-            time.sleep(secs=60)
+            time.sleep(60)
 
 
 if __name__ == '__main__':
