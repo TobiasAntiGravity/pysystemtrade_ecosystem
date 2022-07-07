@@ -16,17 +16,19 @@ client = subprocess.Popen(['hostname'], stdout=subprocess.PIPE).communicate()[0]
 
 
 class SmbClient(object):
-    def __init__(self, ip, username, password, sharename):
+    def __init__(self, ip, username, password, remote_name, sharename):
         self.ip = ip
         self.username = username
         self.password = password
+        self.remote_name = remote_name
         self.sharename = sharename
 
     def connect(self) -> bool:
 
-        self.server = SMBConnection(self.username,
-                                    self.password,
-                                    client,
+        self.server = SMBConnection(username=self.username,
+                                    password=self.password,
+                                    my_name=client,
+                                    remote_name=self.remote_name,
                                     use_ntlm_v2=True)
         success = self.server.connect(self.ip, 139)
 
@@ -163,6 +165,7 @@ if __name__ == '__main__':
     samba_password = config['SAMBA_PASSWORD']
     samba_share = config['SAMBA_SHARE']         # share name of remote server
     samba_server_ip = config['SAMBA_SERVER_IP']
+    samba_remote_name = config['SAMBA_REMOTE_NAME']
 
     path_local_backup_folder = Path('csv_backup/')
 
