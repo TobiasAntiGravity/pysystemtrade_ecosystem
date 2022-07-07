@@ -153,10 +153,10 @@ if __name__ == '__main__':
 
     config = dotenv_values(".env")
 
-    NAME_SUFFIX = config("NAME_SUFFIX")
-    WORKFLOW_WEEKDAY_START = config("WORKFLOW_WEEKDAY_START")
-    WORKFLOW_WEEKDAY_END = config("WORKFLOW_WEEKDAY_END")
-    HOUR_TO_STOP_WORKFLOW_ON_END_WEEKDAY = config("HOUR_TO_STOP_WORKFLOW_ON_END_WEEKDAY")
+    NAME_SUFFIX = config["NAME_SUFFIX"]
+    WORKFLOW_WEEKDAY_START = config["WORKFLOW_WEEKDAY_START"]
+    WORKFLOW_WEEKDAY_END = config["WORKFLOW_WEEKDAY_END"]
+    HOUR_TO_STOP_WORKFLOW_ON_END_WEEKDAY = config["HOUR_TO_STOP_WORKFLOW_ON_END_WEEKDAY"]
     samba_user = config['SAMBA_USER']
     samba_password = config['SAMBA_PASSWORD']
     samba_share = config['SAMBA_SHARE']         # share name of remote server
