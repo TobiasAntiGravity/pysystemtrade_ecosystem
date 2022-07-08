@@ -19,6 +19,7 @@ f_handler = logging.FileHandler('backup.log')
 f_handler.setLevel(logging_level)
 f_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s')
 f_handler.setFormatter(f_format)
+logger.setHandler(f_handler)
 
 client = subprocess.Popen(['hostname'], stdout=subprocess.PIPE).communicate()[0].strip()
 

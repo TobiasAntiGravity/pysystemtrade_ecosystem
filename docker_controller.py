@@ -19,7 +19,7 @@ f_handler = logging.FileHandler('backup.log')
 f_handler.setLevel(logging_level)
 f_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s')
 f_handler.setFormatter(f_format)
-
+logger.setHandler(f_handler)
 
 def wait_until_containers_has_finished(list_of_containers_to_finish: list, docker_client: docker.client):
 
