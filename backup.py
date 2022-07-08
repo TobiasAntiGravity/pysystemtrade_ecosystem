@@ -10,18 +10,27 @@ from smb.base import SharedFile
 from smb.smb_structs import OperationFailure
 from dotenv import dotenv_values
 
-logging.basicConfig(filename='backup.log', level=logging.DEBUG)
+config = dotenv_values(".env")
+logging_level = config['LOGGING_LEVEL']
+
+logger = logging.getLogger(name=__name__)
+logger.setLevel(logging_level)
+f_handler = logging.FileHandler('backup.log')
+f_handler.setLevel(logging_level)
+f_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s')
+f_handler.setFormatter(f_format)
 
 client = subprocess.Popen(['hostname'], stdout=subprocess.PIPE).communicate()[0].strip()
 
 
 class SmbClient(object):
-    def __init__(self, ip, username, password, remote_name, sharename):
+    def __init__(self, ip, username, password, remote_name, sharename, logger=logger):
         self.ip = ip
         self.username = username
         self.password = password
         self.remote_name = remote_name
         self.sharename = sharename
+        self.logger = logger
 
     def connect(self) -> bool:
 
@@ -34,6 +43,7 @@ class SmbClient(object):
                                     use_ntlm_v2=False)
 
         success = self.server.connect(self.ip, 139)
+        self.logger.info(f'SmbClient connected; {success}')
 
         return success
 
@@ -46,34 +56,38 @@ class SmbClient(object):
         try:
             bytes_uploaded = self.server.storeFile(self.sharename, file, data)
 
-        except OperationFailure as exeption:
-            logging.exception(f'Exception occured, because of read failure according to documentation')
+        except OperationFailure as e:
+            msg = f'Exception occured. File {file_path.name} upload to samba share probably failed.'
+            msg += 'Error is read failure according to documentation'
+            self.logger.exception(msg)
 
         else:
-            logging.debug(f"{bytes_uploaded} bytes of {file} uploaded to samba")
+            self.logger.debug(f"{bytes_uploaded} bytes of {file} uploaded to samba")
 
-    def download(self, file):
+    def download(self, file: str):
 
-       with open(file, 'wb') as fileobj:
-           self.server.retrieveFile(self.sharename, fileobj)
+        with open(file, 'wb') as fileobj:
+            self.server.retrieveFile(self.sharename, fileobj)
 
-       print("file has been downloaded in current dir")
+        self.logger.debug(f"file {file} has been downloaded in current dir")
 
     def delete(self, file):
         """remove file from remote share"""
 
         file = '/' + file
         self.server.deleteFiles(self.sharename, file)
-        logging.debug(f'should have deleted file {str(file)}')
+
+        self.logger.debug(f'should have deleted file {str(file)}')
 
     def get_list_of_files_on_share(self, subfolder: str) -> List[SharedFile]:
         """get list of files of remote share"""
 
         file_list = self.server.listPath(self.sharename, '/' + subfolder)
-        logging.debug(f'Retrieved list ')
+        self.logger.debug(f'Retrieved list {file_list}')
+
         return file_list
 
-    def list_files_not_x_most_recent(self, file_list : List[SharedFile], threshold: int) -> List[SharedFile]:
+    def list_files_not_x_most_recent(self, file_list: List[SharedFile], threshold: int) -> List[SharedFile]:
         """Threshold up to and including. 5 gives all files but the 5 most recent"""
 
         file_creation_dict = {}
@@ -83,15 +97,15 @@ class SmbClient(object):
 
         sorted_dict = dict(sorted(file_creation_dict.items(), key=lambda item: item[1], reverse=True))
 
-        sorted_file_name_list = sorted_dict.keys()
-        logging.debug(f'all backup files on share; {sorted_file_name_list}')
+        sorted_file_name_list = list(sorted_dict.keys())
+        self.logger.debug(f'all backup files on share; {sorted_file_name_list}')
 
         not_most_recent_files = sorted_file_name_list[threshold - 1:]
-        logging.debug(f'Files to be deleted from share; {not_most_recent_files}')
+        self.logger.debug(f'Files to be deleted from share; {not_most_recent_files}')
 
         return not_most_recent_files
 
-    def delete_file_not_x_most_recent(self, subfolder: str, threshold: int ):
+    def delete_file_not_x_most_recent(self, subfolder: str, threshold: int):
 
         subfolder_files = self.get_list_of_files_on_share(subfolder=subfolder)
 
@@ -100,11 +114,11 @@ class SmbClient(object):
 
         for file in list_of_files_to_delete:
             self.delete(file.filename)
-            logging.info(f'deleted {file.filename} from samba share, subfolder {subfolder}')
+            self.logger.info(f'deleted {file.filename} from samba share, subfolder {subfolder}')
 
 
 def make_tarfile(path_to_local_backup_dir: Path) -> Path:
-    """Recursively adds all files in passed folder to tar file. Retursn path to created file,
+    """Recursively adds all files in passed folder to tar file. Returns path to created file,
        tarfile is stored in the local backup directory. Will be deleted before new tar file is made
     """
 
@@ -115,9 +129,9 @@ def make_tarfile(path_to_local_backup_dir: Path) -> Path:
     with tarfile.open(str(tar_path), "w:gz") as tar:
         tar.add(str(path_to_local_backup_dir), recursive=True)
 
-    logging.info(f'added local backup director to tar archive and created file {tar_path}')
+    logger.info(f'added local backup director to tar archive and created file {tar_path}')
 
-    return tar_file_name
+    return tar_path
 
 
 def delete_old_tar_files(path_to_local_backup_dir: Path):
@@ -125,11 +139,11 @@ def delete_old_tar_files(path_to_local_backup_dir: Path):
     if len(list(path_to_local_backup_dir.glob('*'))) != 0:
 
         for file_path in path_to_local_backup_dir.glob("*.tar.gz"):
-                file_path.unlink()
-                logging.info(f'Old file deleted {str(file_path)}')
+            file_path.unlink()
+            logger.info(f'Old file deleted {str(file_path)}')
 
     else:
-        logging.info(f'There were no files to be deleted')
+        logger.debug(f'There were no files to be deleted')
 
 
 def backup_csv_files(samba_user: str,
@@ -137,7 +151,7 @@ def backup_csv_files(samba_user: str,
                      samba_share: str,
                      samba_server_ip: str,
                      samba_remote_name: str,
-                     path_local_backup_folder: Path=Path('csv_backup')):
+                     path_local_backup_folder: Path = Path('csv_backup')):
 
     delete_old_tar_files(path_to_local_backup_dir=path_local_backup_folder)
 
@@ -159,7 +173,7 @@ def backup_csv_files(samba_user: str,
             file.unlink()
 
     else:
-        logging.warning('failed to connect to samba share, could not move to external storage')
+        logger.critical('failed to connect to samba share, could not move to external storage')
 
 
 if __name__ == '__main__':
@@ -180,12 +194,3 @@ if __name__ == '__main__':
                      samba_server_ip=samba_server_ip,
                      samba_remote_name=samba_remote_name,
                      path_local_backup_folder=path_local_backup_folder)
-
-
-# todo: implement error handling
-        # if fails to connect - must must handle
-        # if subprocess never finishes must handle
-        # if subprocess fails must handle
-        # if subprocess does a fileNotFound, must handle
-        # if connection fails, must handle.
-# todo: get credentials from .env.
