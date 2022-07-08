@@ -15,11 +15,20 @@ logging_level = config['LOGGING_LEVEL']
 
 logger = logging.getLogger(name=__name__)
 logger.setLevel(logging_level)
-f_handler = logging.FileHandler('backup.log')
+
+f_handler = logging.FileHandler('container_management.log')
 f_handler.setLevel(logging_level)
+
+c_handler = logging.StreamHandler()
+c_handler.setLevel('INFO')
+
 f_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s')
+
 f_handler.setFormatter(f_format)
-logger.setHandler(f_handler)
+c_handler.setFormatter(f_format)
+
+logger.addHandler(f_handler)
+logger.addHandler(c_handler)
 
 client = subprocess.Popen(['hostname'], stdout=subprocess.PIPE).communicate()[0].strip()
 
