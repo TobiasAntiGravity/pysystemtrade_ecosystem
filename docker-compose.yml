@@ -30,7 +30,7 @@ services:
           max-size: "10m"
           max-file: "3"
 
-    daily_processes:
+  daily_processes:
       image: pysystem_image
       container_name: daily_processes${NAME_SUFFIX}
       environment:
