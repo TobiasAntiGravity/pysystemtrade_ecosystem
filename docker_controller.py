@@ -8,7 +8,7 @@ from docker.errors import APIError, NotFound
 from dotenv import dotenv_values
 import git
 
-from backup import backup_csv_files
+from move_backups import move_backup_csv_files
 
 config = dotenv_values(".env")
 logging_level = config['LOGGING_LEVEL']
@@ -59,14 +59,14 @@ def wait_until_containers_has_finished(list_of_containers_to_finish: list, docke
         running_containers_waiting_for = set_of_running_containers.intersection(set_of_containers_to_finish)
 
         if len(running_containers_waiting_for) == 0:
-            logger.debug(f'All containers {list_of_containers_to_finish}, have now stopped')
+            logger.info(f'All containers {list_of_containers_to_finish}, have now stopped, as intended')
             break
 
         else:
             time.sleep(60)
 
             if one_debug_statement:
-                logger.debug(f'Still waiting for {running_containers_waiting_for} containers to stop running')
+                logger.info(f'Still waiting for {running_containers_waiting_for} containers to stop running')
                 one_debug_statement = True
 
 
@@ -116,7 +116,7 @@ def stop_container(container_name: str, docker_client: docker.client, name_suffi
 
     if container_object.status == 'running':
         container_object.stop()
-        logger.debug(f'Container {container_name}, was running. Stopped it.')
+        logger.info(f'Container {container_name}, was running. Stopped it.')
 
     wait_until_containers_has_finished([container_name + name_suffix], docker_client=docker_client)
 
@@ -141,7 +141,7 @@ def git_commit_and_push_reports(commit_untracked_files: bool=True):
             logger.warning(f'Error related to head when pushing', exc_info=True)
 
         else:
-            logger.debug(f'Git push carried out')
+            logger.info(f'Git push carried out')
 
     else:
         logger.debug(f'Repo was not "dirty" - no commit necessary')
@@ -178,11 +178,11 @@ def daily_sequence_flow_management( docker_client: docker.client,
                                      docker_client=docker_client,
                                      name_suffix=name_suffix)
 
-#    backup_csv_files(samba_user=samba_user,
-#                     samba_password=samba_password,
-#                     samba_share=samba_share,
-#                     samba_server_ip=samba_server_ip,
-#                     path_local_backup_folder=path_local_backup_folder)
+#    move_backup_csv_files(samba_user=samba_user,
+#                          samba_password=samba_password,
+#                          samba_share=samba_share,
+#                          samba_server_ip=samba_server_ip,
+#                          path_local_backup_folder=path_local_backup_folder)
 
 
 def run_daily_container_management(docker_client: docker.client,
@@ -220,7 +220,7 @@ def run_daily_container_management(docker_client: docker.client,
 
             if mongo_container_object.status != 'running':
                 mongo_container_object.start()
-                logger.debug('Had to start the "mongo_db" container, as status was not running')
+                logger.info('Started the "mongo_db" container, as status was not running')
 
             try:
                 ib_gateway_container_object = docker_client.containers.get(container_id ="ib_gateway" + name_suffix)
@@ -237,7 +237,7 @@ def run_daily_container_management(docker_client: docker.client,
 
             if ib_gateway_container_object.status != 'running':
                 ib_gateway_container_object.start()
-                logger.debug('Had to start the "ib_gateway" container, as status was not running')
+                logger.info('Started the "ib_gateway" container, as status was not running')
 
             daily_sequence_flow_management(docker_client=docker_client,
                                            name_suffix=name_suffix,

@@ -52,27 +52,38 @@ class SmbClient(object):
                                     remote_name=self.remote_name,
                                     use_ntlm_v2=False)
 
-        success = self.server.connect(self.ip, 139)
-        self.logger.info(f'SmbClient connected; {success}')
-
-        return success
-
-    def upload(self, file_path: Path):
-        """uploads local file to samba share"""
-
-        with open(str(file_path.resolve()), 'rb') as data:
-            file = '/' + file_path.name
-
         try:
-            bytes_uploaded = self.server.storeFile(self.sharename, file, data)
+            success = self.server.connect(self.ip, 139)
 
-        except OperationFailure as e:
-            msg = f'Exception occured. File {file_path.name} upload to samba share probably failed.'
-            msg += 'Error is read failure according to documentation'
-            self.logger.exception(msg)
+        except Exception as e:
+            self.logger.exception(f'Failed to connect to samba share. Nothing uploaded' )
+            return False
 
         else:
-            self.logger.debug(f"{bytes_uploaded} bytes of {file} uploaded to samba")
+            self.logger.info(f'No exception thrown. SmbClient returned bool; {success}')
+            return success
+
+    def upload(self, local_file_path: Path, remote_folder_path: Path):
+        """uploads local file to samba share.
+           remote_folder_path: relative path from sharename root folder, to upload folder.
+           local_file_path: file location on local machine.
+        """
+
+        with open(str(local_file_path.resolve()), 'rb') as data:
+            remote_path_str = str(remote_folder_path / local_file_path.name)
+
+            try:
+                bytes_uploaded = self.server.storeFile(service_name=self.sharename,
+                                                       path=remote_path_str,
+                                                       file_obj=data)
+
+            except OperationFailure as e:
+                msg = f'Exception occured. File {str(local_file_path)} upload to samba share probably failed.'
+                msg += 'Error is read failure according to documentation'
+                self.logger.exception(msg)
+
+            else:
+                self.logger.debug(f"{bytes_uploaded} bytes of {str(local_file_path)} uploaded to samba")
 
     def download(self, file: str):
 
@@ -88,6 +99,15 @@ class SmbClient(object):
         self.server.deleteFiles(self.sharename, file)
 
         self.logger.debug(f'should have deleted file {str(file)}')
+
+    def create_directory(self, directory_name: str, relative_path: Path):
+        """Creates new directory on relative path on samba share from share folder (sharename). Note that folders
+           in the path must exist as only the directory_name will be created
+        """
+
+        self.server.createDirectory(self.sharename, str(relative_path / directory_name))
+        self.logger.debug(f'tried to create {directory_name}, with path {str(relative_path / directory_name)}')
+
 
     def get_list_of_files_on_share(self, subfolder: str) -> List[SharedFile]:
         """get list of files of remote share"""
@@ -156,16 +176,63 @@ def delete_old_tar_files(path_to_local_backup_dir: Path):
         logger.debug(f'There were no files to be deleted')
 
 
-def backup_csv_files(samba_user: str,
-                     samba_password: str,
-                     samba_share: str,
-                     samba_server_ip: str,
-                     samba_remote_name: str,
-                     path_local_backup_folder: Path = Path('csv_backup')):
+def move_backup_csv_files(samba_user: str,
+                          samba_password: str,
+                          samba_share: str,
+                          samba_server_ip: str,
+                          samba_remote_name: str,
+                          path_local_backup_folder: Path = Path('csv_backup'),
+                          path_remote_backup_folder: Path = Path('db_backup')):
+    """Creates a tar file out of arctic csv backup files and moves it to a to samba share.
+       Removes old tar files
+       Deletes the csv files, so that folder is ready for new backup files.
+       Keeps current tar file in backup folder
+    """
+    smb = SmbClient(ip=samba_server_ip,
+                    username=samba_user,
+                    password=samba_password,
+                    remote_name=samba_remote_name,
+                    sharename=samba_share)
 
-    delete_old_tar_files(path_to_local_backup_dir=path_local_backup_folder)
+    if smb.connect():
 
-    path_to_tarfile = make_tarfile(path_to_local_backup_dir=path_local_backup_folder)
+        delete_old_tar_files(path_to_local_backup_dir=path_local_backup_folder)
+
+        path_to_tarfile = make_tarfile(path_to_local_backup_dir=path_local_backup_folder)
+
+        smb.upload(local_file_path=path_to_tarfile,
+                   remote_folder_path=path_remote_backup_folder)
+        smb.delete_file_not_x_most_recent(subfolder=str(path_remote_backup_folder), threshold=5)
+
+        # delete all csv files backed up recursively.
+        for file in path_local_backup_folder.glob('**/*.csv'):
+            file.unlink()
+
+    else:
+        logger.critical('failed to connect to samba share, could not move to external storage')
+
+
+def generate_backup_folder_name() -> str:
+    """Generates a backup folder name that includes move time"""
+
+    backup_time = datetime.now().strftime("%Y_%m_%d_%H_%M")
+    folder_name = f'db_backup_{backup_time}'
+    logger.debug(f"Folder name generated: {folder_name}")
+
+    return folder_name
+
+def move_db_backup_files(samba_user: str,
+                         samba_password: str,
+                         samba_share: str,
+                         samba_server_ip: str,
+                         samba_remote_name: str,
+                         path_local_backup_folder: Path = Path('db_backup'),
+                         path_remote_backup_folder: Path = Path('db_backup')):
+    """Moves generated tar files to samba share for external storage.
+       Does not remove any files. Files generated will be overwritten on next backup.
+       Therefore files in backup folder is always current.
+       Renames the backup files when moving them onto external storage.
+    """
 
     smb = SmbClient(ip=samba_server_ip,
                     username=samba_user,
@@ -175,12 +242,11 @@ def backup_csv_files(samba_user: str,
 
     if smb.connect():
 
-        smb.upload(path_to_tarfile)
-        smb.delete_file_not_x_most_recent(subfolder='/csv_backup', threshold=5)
+        directory_name = generate_backup_folder_name()
+        smb.create_directory( directory_name=directory_name, relative_path=path_remote_backup_folder)
 
-        # delete all csv files backed up recursively.
-        for file in path_local_backup_folder.glob('**/*.csv'):
-            file.unlink()
+        for file_path in path_local_backup_folder.glob('*.tar'):
+            smb.upload(local_file_path=file_path, remote_folder_path=path_remote_backup_folder)
 
     else:
         logger.critical('failed to connect to samba share, could not move to external storage')
@@ -204,3 +270,6 @@ if __name__ == '__main__':
                      samba_server_ip=samba_server_ip,
                      samba_remote_name=samba_remote_name,
                      path_local_backup_folder=path_local_backup_folder)
+
+
+# todo: check destination folder is hardcoded?
