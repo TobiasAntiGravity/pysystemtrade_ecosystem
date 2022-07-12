@@ -20,7 +20,6 @@ ENV SCRIPT_PATH=$SCRIPT_PATH
 ENV PATH "$PATH:$SCRIPT_PATH"
 
 RUN apt-get update
-RUN yes | apt-get install cron
 RUN yes | apt-get install vim
 
 RUN pip3 install --upgrade pip
@@ -47,6 +46,7 @@ WORKDIR /opt/projects/pysystemtrade
 
 RUN mkdir command_scripts
 COPY ./command_scripts /opt/projects/pysystemtrade/command_scripts
+COPY .run_monitor_once.py /opt/projects/pysystemtrade/run_monitor_once.py
 
 RUN pip install -e .
 
