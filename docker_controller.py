@@ -210,7 +210,7 @@ def run_daily_container_management(docker_client: docker.client,
 
         now = datetime.now()
 
-        if (int(weekday_start) <= now.isoweekday() <= int(weekday_end - 1)) or \
+        if (int(weekday_start) <= now.isoweekday() <= int(int(weekday_end) - 1)) or \
             (now.isoweekday() >= int(weekday_start) and (now.isoweekday() == int(weekday_end) and
                                                          now.hour < int(stop_hour))):
 
