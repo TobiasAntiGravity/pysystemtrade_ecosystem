@@ -248,7 +248,7 @@ def run_daily_container_management(docker_client: docker.client,
 
             time.sleep(30)
             logger.info('Giving ib_gateway 30 sec to create connection before starting daily sequence')
-            
+
             daily_sequence_flow_management(docker_client=docker_client,
                                            name_suffix=name_suffix,
                                            samba_user=samba_user,
@@ -258,8 +258,9 @@ def run_daily_container_management(docker_client: docker.client,
                                            path_local_backup_folder=path_local_backup_folder)
 
         else:
-            time.sleep(600)
             logger.debug('Start and stop parameters resolved to weekend. Slowing down while loop runs')
+            time.sleep(600)
+
 
 
 if __name__ == '__main__':
