@@ -272,4 +272,13 @@ if __name__ == '__main__':
                      path_local_backup_folder=path_local_backup_folder)
 
 
+    move_db_backup_files(samba_user=samba_user,
+                         samba_password=samba_password,
+                         samba_share=samba_share,
+                         samba_server_ip=samba_server_ip,
+                         samba_remote_name=samba_remote_name,
+                         path_local_backup_folder=path_local_backup_folder,
+                         path_remote_backup_folder=Path('db_backup'))
+
+
 # todo: check destination folder is hardcoded?
