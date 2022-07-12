@@ -210,8 +210,9 @@ def run_daily_container_management(docker_client: docker.client,
 
         now = datetime.now()
 
-        if (now.isoweekday() >= int(weekday_start)) and (now.isoweekday() <= int(weekday_end) or
-           (now.isoweekday() == int(weekday_end) and now.hour < int(stop_hour))):
+        if (int(weekday_start) <= now.isoweekday() <= int(weekday_end - 1)) or \
+            (now.isoweekday() >= int(weekday_start) and (now.isoweekday() == int(weekday_end) and
+                                                         now.hour < int(stop_hour))):
 
             try:
                 mongo_container_object = docker_client.containers.get(container_id="mongo_db" + name_suffix)
@@ -248,7 +249,7 @@ def run_daily_container_management(docker_client: docker.client,
 
             logger.info('Giving ib_gateway 30 sec to create connection before starting daily sequence')
             time.sleep(30)
-            
+
             daily_sequence_flow_management(docker_client=docker_client,
                                            name_suffix=name_suffix,
                                            samba_user=samba_user,
@@ -260,7 +261,6 @@ def run_daily_container_management(docker_client: docker.client,
         else:
             logger.debug('Start and stop parameters resolved to weekend. Slowing down while loop runs')
             time.sleep(600)
-
 
 
 if __name__ == '__main__':
