@@ -22,33 +22,25 @@ ENV PATH "$PATH:$SCRIPT_PATH"
 RUN apt-get update
 RUN yes | apt-get install vim
 
-RUN pip3 install --upgrade pip
-RUN pip3 install sqlalchemy==1.3.22
-RUN pip3 install psycopg2-binary
-RUN pip3 install pandas==1.0.5
-RUN pip3 install matplotlib>=3.0.0
-RUN pip3 install pyyaml==5.4
-RUN pip3 install numpy>1.19.4
-RUN pip3 install scipy>=1.0.0
-RUN pip3 install pymongo==3.9.0
-RUN pip3 install arctic==1.79.2
-RUN pip3 install ib-insync==0.9.70
-RUN pip3 install psutil==5.6.6
-RUN pip3 install pytest>6.2
-RUN pip3 install Flask>=2.0.1
-RUN pip3 install Werkzeug>=2.0.1
-RUN pip3 install statsmodels==0.12.2
-
 RUN mkdir /opt/projects
+RUN mkdir /opt/projects/pysystemtrade
+
+COPY --from=builder /opt/projects/pysystemtrade/requirements.txt /opt/projects/requirements.txt
+
+RUN pip3 install --upgrade pip
+RUN pip3 install -r requirements.txt
+
+RUN rm /opt/projects/requirements.txt
+
 COPY --from=builder /opt/projects /opt/projects
 
 WORKDIR /opt/projects/pysystemtrade
 
+RUN pip install -e .
+
 RUN mkdir command_scripts
 COPY ./command_scripts /opt/projects/pysystemtrade/command_scripts
-COPY .run_monitor_once.py /opt/projects/pysystemtrade/run_monitor_once.py
-
-RUN pip install -e .
+COPY run_monitor_once.py /opt/projects/pysystemtrade/run_monitor_once.py
 
 RUN mkdir /home/echos
 RUN mkdir /home/csv_backup
