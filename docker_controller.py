@@ -86,7 +86,7 @@ def run_container_and_wait_to_finish(container_name: str, docker_client: docker.
 
     if container_object.status != 'running':
         container_object.start()
-        logger.debug(f'Container {container_name} was not running. Started it')
+        logger.info(f'Container {container_name} was not running. Started it')
 
     else:
         container_object.restart()
