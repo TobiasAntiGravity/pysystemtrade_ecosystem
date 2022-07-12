@@ -246,6 +246,9 @@ def run_daily_container_management(docker_client: docker.client,
                 ib_gateway_container_object.start()
                 logger.info('Started the "ib_gateway" container, as status was not running')
 
+            time.sleep(30)
+            logger.info('Giving ib_gateway 30 sec to create connection before starting daily sequence')
+            
             daily_sequence_flow_management(docker_client=docker_client,
                                            name_suffix=name_suffix,
                                            samba_user=samba_user,
