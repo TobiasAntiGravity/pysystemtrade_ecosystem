@@ -8,7 +8,7 @@ from docker.errors import APIError, NotFound
 from dotenv import dotenv_values
 import git
 
-from move_backups import move_backup_csv_files
+from move_backups import move_backup_csv_files, move_db_backup_files
 
 config = dotenv_values(".env")
 logging_level = config['LOGGING_LEVEL']
@@ -184,6 +184,13 @@ def daily_sequence_flow_management( docker_client: docker.client,
 #                          samba_server_ip=samba_server_ip,
 #                          path_local_backup_folder=path_local_backup_folder)
 
+#    move_db_backup_files(samba_user=samba_user,
+#                         samba_password=samba_password,
+#                         samba_share=samba_share,
+#                        samba_server_ip=samba_server_ip,
+#                         samba_remote_name=samba_remote_name,
+#                         path_local_backup_folder=path_local_backup_folder,
+#                         path_remote_backup_folder=Path('db_backup'))
 
 def run_daily_container_management(docker_client: docker.client,
                                    name_suffix: str,
