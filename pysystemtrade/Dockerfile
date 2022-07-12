@@ -28,9 +28,10 @@ RUN mkdir /opt/projects/pysystemtrade
 COPY --from=builder /opt/projects/pysystemtrade/requirements.txt /opt/projects/requirements.txt
 
 RUN pip3 install --upgrade pip
-RUN pip3 install -r requirements.txt
 
-RUN rm /opt/projects/requirements.txt
+WORKDIR /opt/projects
+
+RUN pip3 install --requirement requirements.txt
 
 COPY --from=builder /opt/projects /opt/projects
 
