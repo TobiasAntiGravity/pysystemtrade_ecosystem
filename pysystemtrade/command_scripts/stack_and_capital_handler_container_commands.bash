@@ -7,6 +7,6 @@ startup
 
 run_stack_handler &
 run_capital_update
-#python3 /opt/projects/pysystemtrade/syscontrol/monitor.py
+
 
 
