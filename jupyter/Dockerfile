@@ -29,9 +29,11 @@ WORKDIR /opt/projects
 RUN pip3 install --requirement requirements.txt
 RUN pip3 install jupyterlab
 
+COPY --from=builder /opt/projects /opt/projects
+
 WORKDIR /opt/projects/pysystemtrade
 
-RUN pip install -e .
+RUN pip3 install -e .
 
 COPY ./jupyter_server_config.py /usr/jupyter_server_config.py
 
