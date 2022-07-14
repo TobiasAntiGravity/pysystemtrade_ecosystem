@@ -186,7 +186,7 @@ services:
       depends_on:
         - stack_and_capital_handler   # needed to avoid building same image twice
         - mongo_db
-      container_name: csv_backup{NAME_SUFFIX}
+      container_name: csv_backup${NAME_SUFFIX}
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.7
@@ -201,7 +201,7 @@ services:
 
   db_backup:
       image: alpine
-      container_name: db_backup{NAME_SUFFIX}
+      container_name: db_backup${NAME_SUFFIX}
       volumes:
         - mongo_db:/data/db
         - mongo_conf:/data/configdb
