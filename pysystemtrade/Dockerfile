@@ -46,5 +46,3 @@ COPY run_monitor_once.py /opt/projects/pysystemtrade/run_monitor_once.py
 RUN mkdir /home/echos
 RUN mkdir /home/csv_backup
 
-CMD ["/bin/bash", "-c", "tail -f /dev/null"]
-
