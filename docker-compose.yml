@@ -15,7 +15,7 @@ services:
       environment:
         IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
         PYSYS_CODE: ${PYSYS_CODE}
-      command: ["/bin/bash", "-c", "python /opt/projects/pysystemtrade/sysproduction/run_stack_handler.py"]
+      command: ["/bin/bash", "-c", "command_scripts/stack_handler_commands.bash"]
       depends_on:
         - ib_gateway
         - mongo_db
@@ -37,7 +37,7 @@ services:
       environment:
         IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
         PYSYS_CODE: ${PYSYS_CODE}
-      command: ["/bin/bash", "-c", "python /opt/projects/pysystemtrade/sysproduction/run_capital_update.py"]
+      command: ["/bin/bash", "-c", "command_scripts/stack_handler_commands.bash"]
       depends_on:
         - ib_gateway
         - mongo_db
@@ -59,7 +59,7 @@ services:
       environment:
         IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
         PYSYS_CODE: ${PYSYS_CODE}
-      command: ["/bin/bash", "-c", "python /opt/projects/pysystemtrade/sysproduction/startup.py"]
+      command: ["/bin/bash", "-c", "command_scripts/startup_commands.bash"]
       depends_on:
         - ib_gateway
         - mongo_db
@@ -81,7 +81,7 @@ services:
       environment:
         IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
         PYSYS_CODE: ${PYSYS_CODE}
-      command: ["/bin/bash", "-c", "python /opt/projects/pysystemtrade/run_monitor_once.py"]
+      command: ["/bin/bash", "-c", "command_scripts/monitor_once_commands.bash"]
       depends_on:
         - ib_gateway
         - mongo_db
