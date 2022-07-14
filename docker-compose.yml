@@ -61,7 +61,6 @@ services:
         PYSYS_CODE: ${PYSYS_CODE}
       command: ["/bin/bash", "-c", "command_scripts/startup_commands.bash"]
       depends_on:
-        - ib_gateway
         - mongo_db
       networks:
         channel:
@@ -83,7 +82,6 @@ services:
         PYSYS_CODE: ${PYSYS_CODE}
       command: ["/bin/bash", "-c", "command_scripts/monitor_once_commands.bash"]
       depends_on:
-        - ib_gateway
         - mongo_db
       networks:
         channel:

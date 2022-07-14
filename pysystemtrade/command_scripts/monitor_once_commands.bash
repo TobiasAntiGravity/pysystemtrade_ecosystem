@@ -1,4 +1,5 @@
 #!/bin/bash
 
-python3 run_monitor_once.py
+python3 /opt/projects/pysystemtrade/run_monitor_once.py
+
 
