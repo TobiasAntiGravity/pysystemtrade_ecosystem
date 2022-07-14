@@ -164,7 +164,7 @@ def daily_pysys_flow(docker_client: docker.client,
 
     """Handles the daily start and stop of the containers housing different pysys processes"""
 
-    clean_slate_containers = ['startup', 'monitor_once']
+    clean_slate_containers = ['cleaner']
 
     for container_name in clean_slate_containers:
         run_container_and_wait_to_finish(container_name=container_name,
@@ -181,7 +181,7 @@ def daily_pysys_flow(docker_client: docker.client,
     wait_until_containers_has_finished(list_of_containers_to_finish=continous_containers,
                                        docker_client=docker_client)
 
-    end_of_day_processes = ['startup', 'monitor_once', 'daily_processes']
+    end_of_day_processes = ['cleaner', 'daily_processes']
 
     for container_name in end_of_day_processes:
         run_container_and_wait_to_finish(container_name=container_name,

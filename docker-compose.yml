@@ -52,40 +52,19 @@ services:
           max-size: "10m"
           max-file: "3"
 
-  startup:
+  cleaner:
       image: pysystem_image
-      container_name: startup${NAME_SUFFIX}
+      container_name: cleaner${NAME_SUFFIX}
       restart: on-failure
       environment:
         IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
         PYSYS_CODE: ${PYSYS_CODE}
-      command: ["/bin/bash", "-c", "command_scripts/startup_commands.bash"]
+      command: ["/bin/bash", "-c", "command_scripts/cleaner_commands.bash"]
       depends_on:
         - mongo_db
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.10
-      stdin_open: true
-      tty: true
-      init: true
-      logging:
-        options:
-          max-size: "200k"
-          max-file: "1"
-
-  monitor_once:
-      image: pysystem_image
-      container_name: monitor_once${NAME_SUFFIX}
-      restart: on-failure
-      environment:
-        IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
-        PYSYS_CODE: ${PYSYS_CODE}
-      command: ["/bin/bash", "-c", "command_scripts/monitor_once_commands.bash"]
-      depends_on:
-        - mongo_db
-      networks:
-        channel:
-          ipv4_address: ${IPV4_NETWORK_PART}0.11
       stdin_open: true
       tty: true
       init: true
