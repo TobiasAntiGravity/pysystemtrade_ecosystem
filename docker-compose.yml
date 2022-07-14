@@ -81,7 +81,7 @@ services:
       environment:
         IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
         PYSYS_CODE: ${PYSYS_CODE}
-      command: ["/bin/bash", "-c", "python /opt/projects/pysystemtrade/startup.py"]
+      command: ["/bin/bash", "-c", "python /opt/projects/pysystemtrade/run_monitor_once.py"]
       depends_on:
         - ib_gateway
         - mongo_db
