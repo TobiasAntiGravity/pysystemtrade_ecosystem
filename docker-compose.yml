@@ -41,6 +41,7 @@ services:
       depends_on:
         - ib_gateway
         - mongo_db
+        - stack_handler   # needed to avoid building same image twice
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.9
@@ -62,6 +63,7 @@ services:
       command: ["/bin/bash", "-c", "command_scripts/cleaner_commands.bash"]
       depends_on:
         - mongo_db
+        - stack_handler   # needed to avoid building same image twice
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.10
@@ -83,7 +85,7 @@ services:
       depends_on:
         - ib_gateway
         - mongo_db
-        - stack_and_capital_handler   # needed to avoid building same image twice
+        - stack_handler   # needed to avoid building same image twice
       volumes:
         - ./reports:/home/reports
         - ./backtests:/home/backtests
@@ -161,7 +163,7 @@ services:
   csv_backup:
       image: pysystem_image
       depends_on:
-        - stack_and_capital_handler   # needed to avoid building same image twice
+        - stack_handler   # needed to avoid building same image twice
         - mongo_db
       container_name: csv_backup${NAME_SUFFIX}
       networks:
