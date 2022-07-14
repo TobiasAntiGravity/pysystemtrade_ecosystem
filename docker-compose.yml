@@ -171,7 +171,7 @@ services:
           ipv4_address: ${IPV4_NETWORK_PART}0.7
       volumes:
         - ./csv_backup:/home/csv_backup
-      command: ["/bin/bash", "-c", "/opt/projects/pysystemtrade/sysproduction/linux/scripts/backup_arctic_to_csv"]
+      command: sh -c "cd sysproduction/linux/scripts; backup_arctic_to_csv"
       init: true
       logging:
         options:
