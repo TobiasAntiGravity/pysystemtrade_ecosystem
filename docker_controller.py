@@ -31,10 +31,14 @@ logger.addHandler(f_handler)
 logger.addHandler(c_handler)
 
 
-def wait_until_containers_has_finished(list_of_containers_to_finish: list, docker_client: docker.client):
+def wait_until_containers_has_finished(list_of_containers_to_finish: list,
+                                       docker_client: docker.client,
+                                       name_suffix: str):
+
+    container_names_with_suffix = [name + name_suffix for name in list_of_containers_to_finish]
 
     try:
-        set_of_containers_to_finish = set(list_of_containers_to_finish)
+        set_of_containers_to_finish = set(container_names_with_suffix)
 
     except APIError as e:
         msg = 'Docker APIError, Could not retrieve list of running containers when '
@@ -179,7 +183,7 @@ def daily_pysys_flow(docker_client: docker.client,
                       name_suffix=name_suffix)
 
     wait_until_containers_has_finished(list_of_containers_to_finish=continous_containers,
-                                       docker_client=docker_client)
+                                       docker_client=docker_client, name_suffix=name_suffix)
 
     end_of_day_processes = ['cleaner', 'daily_processes']
 
