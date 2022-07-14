@@ -116,7 +116,6 @@ services:
           max-file: "1"
 
   csv_backup:
-      profiles: ["csv_backup"]
       image: pysystem_image
       depends_on:
         - stack_and_capital_handler   # needed to avoid building same image twice
