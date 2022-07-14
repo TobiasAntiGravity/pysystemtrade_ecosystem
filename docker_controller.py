@@ -70,19 +70,20 @@ def wait_until_containers_has_finished(list_of_containers_to_finish: list, docke
                 one_debug_statement = True
 
 
-def run_container_and_wait_to_finish(container_name: str, docker_client: docker.client, name_suffix: str):
+def run_container(container_name: str, docker_client: docker.client, name_suffix: str):
+    '''Starts a container, handles exception, but re-raises exception for handling further upstream'''
 
     try:
         container_object = docker_client.containers.get(container_id=container_name + name_suffix)
 
     except APIError as e:
         logger.critical(f'APIError - Failed to retrieve {container_name} container, stopping program', exc_info=True)
-        exit()
+        raise e
 
     except NotFound as e:
         msg = f'Failed to retrieve {container_name} container - apparently does not exist'
         logger.critical(msg, exc_info=True)
-        exit()
+        raise e
 
     if container_object.status != 'running':
         container_object.start()
@@ -93,6 +94,17 @@ def run_container_and_wait_to_finish(container_name: str, docker_client: docker.
         msg = f'Container {container_name} was restarted. Should not be running, probably stale. '
         msg += f'Need to resart processes'
         logger.warning(msg)
+
+
+def run_container_and_wait_to_finish(container_name: str, docker_client: docker.client, name_suffix: str):
+    '''Runs a container and waits for it to finish. Stops program execution if something occurs'''
+
+    try:
+        run_container(container_name=container_name, docker_client=docker_client, name_suffix=name_suffix)
+
+    except exception as e:
+        logger.critical(f'{container_name} failed to run. Flow depends on wait until finsih. Exit.', exc_info=True)
+        exit()
 
     wait_until_containers_has_finished([container_name + name_suffix], docker_client=docker_client)
 
@@ -147,50 +159,62 @@ def git_commit_and_push_reports(commit_untracked_files: bool=True):
         logger.debug(f'Repo was not "dirty" - no commit necessary')
 
 
-def daily_sequence_flow_management( docker_client: docker.client,
-                                    name_suffix: str,
-                                    samba_user: str,
-                                    samba_password: str,
-                                    samba_share: str,
-                                    samba_server_ip: str,
-                                    path_local_backup_folder: Path = Path('csv_backup')):
+def daily_pysys_flow(docker_client: docker.client,
+                     name_suffix: str):
 
-    """Handles the daily start and stop of the different containers"""
+    """Handles the daily start and stop of the containers housing different pysys processes"""
 
-    container_sequence = ['stack_and_capital_handler', 'daily_processes']
+    clean_slate_containers = ['startup', 'monitor_once']
 
-    for container_name in container_sequence:
+    for container_name in clean_slate_containers:
         run_container_and_wait_to_finish(container_name=container_name,
                                          docker_client=docker_client,
                                          name_suffix=name_suffix)
 
-    run_container_and_wait_to_finish(container_name='csv_backup',
-                                     docker_client=docker_client,
-                                     name_suffix=name_suffix)
+    continous_containers = ['stack_handler', 'capital_update']
 
-    git_commit_and_push_reports()
+    for container_name in continous_containers:
+        run_container(container_name=container_name,
+                      docker_client=docker_client,
+                      name_suffix=name_suffix)
+
+    wait_until_containers_has_finished(list_of_containers_to_finish=continous_containers,
+                                       docker_client=docker_client)
+
+    end_of_day_processes = ['startup', 'monitor_once', 'daily_processes']
+
+    for container_name in end_of_day_processes:
+        run_container_and_wait_to_finish(container_name=container_name,
+                                         docker_client=docker_client,
+                                         name_suffix=name_suffix)
+
+    try:
+        run_container(container_name='csv_backup',
+                      docker_client=docker_client,
+                      name_suffix=name_suffix)
+
+    except exception:
+        logger.warning(f'csv backup failed. Continuing program', exc_info=True)
+
+    try:
+        git_commit_and_push_reports()
+
+    except exception:
+        logger.info(f'git handling failed. Continuing program', exc_info=True)
+
 
     stop_container(container_name='mongo_db' + name_suffix,
                    docker_client=docker_client,
                    name_suffix=name_suffix)
 
-    run_container_and_wait_to_finish(container_name='db_backup',
-                                     docker_client=docker_client,
-                                     name_suffix=name_suffix)
+    try:
+        run_container(container_name='db_backup',
+                      docker_client=docker_client,
+                      name_suffix=name_suffix)
 
-#    move_backup_csv_files(samba_user=samba_user,
-#                          samba_password=samba_password,
-#                          samba_share=samba_share,
-#                          samba_server_ip=samba_server_ip,
-#                          path_local_backup_folder=path_local_backup_folder)
+    except exception:
+        logger.warning(f'db backup failed. Continuing program', exc_info=True)
 
-#    move_db_backup_files(samba_user=samba_user,
-#                         samba_password=samba_password,
-#                         samba_share=samba_share,
-#                        samba_server_ip=samba_server_ip,
-#                         samba_remote_name=samba_remote_name,
-#                         path_local_backup_folder=path_local_backup_folder,
-#                         path_remote_backup_folder=Path('db_backup'))
 
 def run_daily_container_management(docker_client: docker.client,
                                    name_suffix: str,
@@ -215,48 +239,52 @@ def run_daily_container_management(docker_client: docker.client,
                                                          now.hour < int(stop_hour))):
 
             try:
-                mongo_container_object = docker_client.containers.get(container_id="mongo_db" + name_suffix)
+                run_container(container_name='mongo_db', docker_client=docker_client, name_suffix=name_suffix)
+                #should be down either from daily_pysys_flow, or from startup
 
-            except APIError as e:
-                logger.critical(f'APIError - Failed to retrieve "mongo_db" container, stopping program', exc_info=True)
+            except exception:
+                logger.critical(f'Something happened when starting mongo_db, terminating', exc_info=True)
                 exit()
-
-            except NotFound as e:
-                msg = f'Failed to retrieve "mongo_db" container - apparently does not exist'
-                logger.critical(msg, exc_info=True)
-                exit()
-
-            if mongo_container_object.status != 'running':
-                mongo_container_object.start()
-                logger.info('Started the "mongo_db" container, as status was not running')
 
             try:
-                ib_gateway_container_object = docker_client.containers.get(container_id ="ib_gateway" + name_suffix)
+                run_container(container_name='ib_gateway', docker_client=docker_client, name_suffix=name_suffix)
+                #should be down either from shut down end of this function, or from startup
 
-            except APIError as e:
-                msg = f'APIError - Failed to retrieve "ib_gateway" container. Stopping program'
-                logger.critical(msg, exc_info=True)
+            except exception:
+                logger.critical(f'Something happened when starting ib_gateway, terminating', exc_info=True)
                 exit()
-
-            except NotFound as e:
-                msg = f'Failed to retrieve "ib_gateway" container - apparently does not exist'
-                logger.critical(msg, exc_info=True)
-                exit()
-
-            if ib_gateway_container_object.status != 'running':
-                ib_gateway_container_object.start()
-                logger.info('Started the "ib_gateway" container, as status was not running')
 
             logger.info('Giving ib_gateway 30 sec to create connection before starting daily sequence')
             time.sleep(30)
 
-            daily_sequence_flow_management(docker_client=docker_client,
-                                           name_suffix=name_suffix,
-                                           samba_user=samba_user,
-                                           samba_password=samba_password,
-                                           samba_share=samba_share,
-                                           samba_server_ip=samba_server_ip,
-                                           path_local_backup_folder=path_local_backup_folder)
+            daily_pysys_flow(docker_client=docker_client,
+                             name_suffix=name_suffix)
+
+            stop_container(container_name='ib_gateway',
+                           docker_client=docker_client,
+                           name_suffix=name_suffix)
+
+            try:
+                move_backup_csv_files(samba_user=samba_user,
+                                      samba_password=samba_password,
+                                      samba_share=samba_share,
+                                      samba_server_ip=samba_server_ip,
+                                      path_local_backup_folder=path_local_backup_folder)
+
+            except exception:
+                logger.warning('Failed when trying to move csv backup to external share', exc_info=True)
+
+            try:
+                move_db_backup_files(samba_user=samba_user,
+                                     samba_password=samba_password,
+                                     samba_share=samba_share,
+                                     samba_server_ip=samba_server_ip,
+                                     samba_remote_name=samba_remote_name,
+                                     path_local_backup_folder=path_local_backup_folder,
+                                     path_remote_backup_folder=Path('db_backup'))
+
+            except exception:
+                logger.warning('Failed when trying to move db backup to external share', exc_info=True)
 
         else:
             logger.debug('Start and stop parameters resolved to weekend. Slowing down while loop runs')
@@ -293,7 +321,4 @@ if __name__ == '__main__':
 
 
 # todo: should implement surveilance on disk usage / docker cleaning if necessary
-# todo: implement db backup handling.
-# todo: move backup files to external storage after backup;
-# - csv_backup - either overwrite files, or have multiple days backup
-# - db_backup. Single couple of days backup.
+# todo: notification of warnings and critical should be implemented.

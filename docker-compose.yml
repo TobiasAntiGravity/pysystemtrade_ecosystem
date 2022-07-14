@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
 
-  stack_and_capital_handler:
+  stack_handler:
       image: pysystem_image
       build:
         context: ./pysystemtrade
@@ -10,12 +10,12 @@ services:
         args:
           GIT_TOKEN: ${GIT_TOKEN}
           SCRIPT_PATH: ${SCRIPT_PATH}
-      container_name: stack_and_capital_handler${NAME_SUFFIX}
+      container_name: stack_handler${NAME_SUFFIX}
       restart: on-failure
       environment:
         IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
         PYSYS_CODE: ${PYSYS_CODE}
-      command: ["/bin/bash", "-c", "command_scripts/stack_and_capital_handler_container_commands.bash"]
+      command: ["/bin/bash", "-c", "python /opt/projects/pysystemtrade/sysproduction/run_stack_handler.py"]
       depends_on:
         - ib_gateway
         - mongo_db
@@ -29,6 +29,72 @@ services:
         options:
           max-size: "10m"
           max-file: "3"
+
+  capital_update:
+      image: pysystem_image
+      container_name: capital_update${NAME_SUFFIX}
+      restart: on-failure
+      environment:
+        IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
+        PYSYS_CODE: ${PYSYS_CODE}
+      command: ["/bin/bash", "-c", "python /opt/projects/pysystemtrade/sysproduction/run_capital_update.py"]
+      depends_on:
+        - ib_gateway
+        - mongo_db
+      networks:
+        channel:
+          ipv4_address: ${IPV4_NETWORK_PART}0.9
+      stdin_open: true
+      tty: true
+      init: true
+      logging:
+        options:
+          max-size: "10m"
+          max-file: "3"
+
+  startup:
+      image: pysystem_image
+      container_name: startup${NAME_SUFFIX}
+      restart: on-failure
+      environment:
+        IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
+        PYSYS_CODE: ${PYSYS_CODE}
+      command: ["/bin/bash", "-c", "python /opt/projects/pysystemtrade/sysproduction/startup.py"]
+      depends_on:
+        - ib_gateway
+        - mongo_db
+      networks:
+        channel:
+          ipv4_address: ${IPV4_NETWORK_PART}0.10
+      stdin_open: true
+      tty: true
+      init: true
+      logging:
+        options:
+          max-size: "200k"
+          max-file: "1"
+
+  monitor_once:
+      image: pysystem_image
+      container_name: monitor_once${NAME_SUFFIX}
+      restart: on-failure
+      environment:
+        IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
+        PYSYS_CODE: ${PYSYS_CODE}
+      command: ["/bin/bash", "-c", "python /opt/projects/pysystemtrade/startup.py"]
+      depends_on:
+        - ib_gateway
+        - mongo_db
+      networks:
+        channel:
+          ipv4_address: ${IPV4_NETWORK_PART}0.11
+      stdin_open: true
+      tty: true
+      init: true
+      logging:
+        options:
+          max-size: "200k"
+          max-file: "1"
 
   daily_processes:
       image: pysystem_image
@@ -125,7 +191,7 @@ services:
           ipv4_address: ${IPV4_NETWORK_PART}0.7
       volumes:
         - ./csv_backup:/home/csv_backup
-      command: ["/bin/bash", "-c", "command_scripts/csv_backup_commands.bash"]
+      command: ["/bin/bash", "-c", "/opt/projects/pysystemtrade/sysproduction/linux/scripts/backup_arctic_to_csv"]
       init: true
       logging:
         options:
@@ -133,7 +199,6 @@ services:
           max-file: "1"
 
   db_backup:
-      profiles: ["db_backup"]
       image: alpine
       volumes:
         - mongo_db:/data/db
