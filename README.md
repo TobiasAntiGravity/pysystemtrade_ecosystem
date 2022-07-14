@@ -44,9 +44,9 @@ so it should be stressed that this is not a secure way of handling credentials, 
 The "TobiasAntiGravity/ib-gateway-docker" is a public fork of "antequant/ib-gateway-docker". Some changes had to be done to get it working - see commit messages in fork. This repo has to be pulled in as a subfolder into the pysystemtrade_ecosystem to get the IBKR gateway up and running. This is done in the following way; 
 
 1) Add the remote fork repo as a remote into pysystemtrade_ecosystem git repo\
-`git remote add -f ib_gateway https://github.com/TobiasAntiGravity/ib-gateway-docker.git` (public repo no need for personal access token)
+`git remote add -f ib_gateway https://github.com/Centric-Technologies/ibgateway.git` (public repo no need for personal access token)
 
-2) Pull the ib_gateway repo into the local repo of pysystemtrade_ecosystem, such that the folder structure becomes `pysystemtrade_ecosystem/ib-gateway`. Run the following git command:\
+2) Pull the ib_gateway repo into the local repo of pysystemtrade_ecosystem, such that the folder structure becomes `pysystemtrade_ecosystem/ib_gateway`. Run the following git command:\
 \
 `git subtree add --prefix ib_gateway ib_gateway/master --squash`\
 *Note; important that cwd is pysystemtrade_ecosystem before command is run*\
