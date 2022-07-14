@@ -101,17 +101,19 @@ services:
           max-file: "3"
 
   ib_gateway:
-      build:
-        context: ./ib_gateway
-        dockerfile: ./Dockerfile
-      container_name: ib_gateway${NAME_SUFFIX}
+      image: mgvazquez/ibgateway:latest
       restart: always
+      container_name: ib_gateway${NAME_SUFFIX}
       ports:
-        - "4002:4002"
+        - "7462:7462"
+        - "4001:4001"
         - "5900:5900"
       environment:
-        TWSUSERID: ${TWSUSERID}
-        TWSPASSWORD: ${TWSPASSWORD}
+        - VNC_PASSWORD=${VNCPASSWORD}
+        - VNC_PORT=5900
+        - TWSUSERID=${TWSUSERID}
+        - TWSPASSWORD=${TWSPASSWORD}
+        - TRADING_MODE=${TRADINGMODE}
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.3
