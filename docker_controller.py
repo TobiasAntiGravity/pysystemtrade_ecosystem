@@ -106,7 +106,7 @@ def run_container_and_wait_to_finish(container_name: str, docker_client: docker.
     try:
         run_container(container_name=container_name, docker_client=docker_client, name_suffix=name_suffix)
 
-    except exception as e:
+    except Exception as e:
         logger.critical(f'{container_name} failed to run. Flow depends on wait until finsih. Exit.', exc_info=True)
         exit()
 
