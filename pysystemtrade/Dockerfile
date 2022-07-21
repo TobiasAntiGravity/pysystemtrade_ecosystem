@@ -21,6 +21,9 @@ ENV SCRIPT_PATH=$SCRIPT_PATH
 ENV ECHO_PATH=$ECHO_PATH
 ENV PATH "$PATH:$SCRIPT_PATH"
 
+RUN  ln -sf /usr/share/zoneinfo/Europe/London /etc/timezone && \
+     ln -sf /usr/share/zoneinfo/Europe/London /etc/localtime
+
 RUN apt-get update
 RUN yes | apt-get install cron
 RUN yes | apt-get install vim
