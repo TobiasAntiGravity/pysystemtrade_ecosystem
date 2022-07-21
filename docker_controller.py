@@ -207,7 +207,7 @@ def daily_pysys_flow(docker_client: docker.client,
         logger.info(f'git handling failed. Continuing program', exc_info=True)
 
 
-    stop_container(container_name='mongo_db' + name_suffix,
+    stop_container(container_name='mongo_db',
                    docker_client=docker_client,
                    name_suffix=name_suffix)
 
