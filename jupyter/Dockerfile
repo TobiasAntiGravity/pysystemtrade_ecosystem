@@ -12,6 +12,9 @@ RUN git clone -b my_branch https://${GIT_TOKEN}:@github.com/GITUSERNAME/private_
 
 FROM python:3.8.12 as final_stage
 
+RUN  ln -sf /usr/share/zoneinfo/Europe/London /etc/timezone && \
+     ln -sf /usr/share/zoneinfo/Europe/London /etc/localtime
+
 RUN apt-get update
 RUN yes | apt-get install vim
 
