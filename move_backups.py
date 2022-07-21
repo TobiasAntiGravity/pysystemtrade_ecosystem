@@ -262,13 +262,12 @@ if __name__ == '__main__':
     samba_server_ip = config['SAMBA_SERVER_IP']
     samba_remote_name = config['SAMBA_REMOTE_NAME']
 
-    backup_csv_files(samba_user=samba_user,
-                     samba_password=samba_password,
-                     samba_share=samba_share,
-                     samba_server_ip=samba_server_ip,
-                     samba_remote_name=samba_remote_name,
-                     path_local_backup_folder=Path('csv_backup/'))
-
+    move_db_backup_files(samba_user=samba_user,
+                         samba_password=samba_password,
+                         samba_share=samba_share,
+                         samba_server_ip=samba_server_ip,
+                         samba_remote_name=samba_remote_name,
+                         path_local_backup_folder=Path('csv_backup/'))
 
     move_db_backup_files(samba_user=samba_user,
                          samba_password=samba_password,
