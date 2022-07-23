@@ -30,7 +30,7 @@ c_handler.setFormatter(f_format)
 logger.addHandler(f_handler)
 logger.addHandler(c_handler)
 
-client = subprocess.Popen(['hostname'], stdout=subprocess.PIPE).communicate()[0].strip()
+#client = subprocess.Popen(['hostname'], stdout=subprocess.PIPE).communicate()[0].strip()
 
 
 class SmbClient(object):
@@ -48,9 +48,11 @@ class SmbClient(object):
 
         self.server = SMBConnection(username=self.username,
                                     password=self.password,
-                                    my_name=client,
+                                    my_name='host_computer',
+                          #          domain=client,
                                     remote_name=self.remote_name,
-                                    use_ntlm_v2=False)
+                                    use_ntlm_v2=True,
+                                    is_direct_tcp=True)
 
         try:
             success = self.server.connect(self.ip, 139)
@@ -105,9 +107,14 @@ class SmbClient(object):
            in the path must exist as only the directory_name will be created
         """
 
-        self.server.createDirectory(self.sharename, str(relative_path / directory_name))
-        self.logger.debug(f'tried to create {directory_name}, with path {str(relative_path / directory_name)}')
+        try:
+            self.logger.debug(f'Will try to create {directory_name}, with path {str(relative_path / directory_name)}')
+            self.server.createDirectory(self.sharename, str(relative_path / directory_name))
 
+        except OperationFailure:
+            message = f'Got a operation failure notice, saying that directory was not created. Funny thing is '
+            message += 'though - it might be created after all. Will therefore ignore and proceed'
+            self.logger.warning(message)
 
     def get_list_of_files_on_share(self, subfolder: str) -> List[SharedFile]:
         """get list of files of remote share"""
@@ -182,7 +189,7 @@ def move_backup_csv_files(samba_user: str,
                           samba_server_ip: str,
                           samba_remote_name: str,
                           path_local_backup_folder: Path = Path('csv_backup'),
-                          path_remote_backup_folder: Path = Path('db_backup')):
+                          path_remote_backup_folder: Path = Path('csv_backup')):
     """Creates a tar file out of arctic csv backup files and moves it to a to samba share.
        Removes old tar files
        Deletes the csv files, so that folder is ready for new backup files.
@@ -262,7 +269,7 @@ if __name__ == '__main__':
     samba_server_ip = config['SAMBA_SERVER_IP']
     samba_remote_name = config['SAMBA_REMOTE_NAME']
 
-    move_db_backup_files(samba_user=samba_user,
+    move_backup_csv_files(samba_user=samba_user,
                          samba_password=samba_password,
                          samba_share=samba_share,
                          samba_server_ip=samba_server_ip,
@@ -274,5 +281,5 @@ if __name__ == '__main__':
                          samba_share=samba_share,
                          samba_server_ip=samba_server_ip,
                          samba_remote_name=samba_remote_name,
-                         path_local_backup_folder=path_local_backup_folder,
+                         path_local_backup_folder=Path('db_backup'),
                          path_remote_backup_folder=Path('db_backup'))
