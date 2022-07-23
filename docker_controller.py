@@ -134,7 +134,9 @@ def stop_container(container_name: str, docker_client: docker.client, name_suffi
         container_object.stop()
         logger.info(f'Container {container_name}, was running. Stopped it.')
 
-    wait_until_containers_has_finished([container_name + name_suffix], docker_client=docker_client)
+    wait_until_containers_has_finished([container_name],
+                                       docker_client=docker_client,
+                                       name_suffix=name_suffix)
 
 
 def git_commit_and_push_reports(commit_untracked_files: bool=True):
