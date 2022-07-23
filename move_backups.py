@@ -253,7 +253,7 @@ def move_db_backup_files(samba_user: str,
         smb.create_directory( directory_name=directory_name, relative_path=path_remote_backup_folder)
 
         for file_path in path_local_backup_folder.glob('*.tar'):
-            smb.upload(local_file_path=file_path, remote_folder_path=path_remote_backup_folder)
+            smb.upload(local_file_path=file_path, remote_folder_path=path_remote_backup_folder / directory_name)
 
     else:
         logger.critical('failed to connect to samba share, could not move to external storage')
