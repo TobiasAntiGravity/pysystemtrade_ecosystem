@@ -2,9 +2,9 @@
 
 cd sysproduction/linux/scripts
 
-run_daily_price_updates
-run_systems
-run_strategy_order_generator
-run_cleaners
-run_reports
+echo run_daily_price_updates >> /proc/1/fd/1
+echo run_systems >> /proc/1/fd/1
+echo run_strategy_order_generator >> /proc/1/fd/1
+echo run_cleaners >> /proc/1/fd/1
+echo run_reports >> /proc/1/fd/1
 

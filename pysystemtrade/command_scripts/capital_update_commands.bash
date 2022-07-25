@@ -1,4 +1,6 @@
 #!/bin/bash
 
 cd sysproduction/linux/scripts
-run_capital_update
+echo run_capital_update >> /proc/1/fd/1
+
+

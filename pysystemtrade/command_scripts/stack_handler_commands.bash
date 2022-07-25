@@ -1,4 +1,4 @@
 #!/bin/bash
 
 cd sysproduction/linux/scripts
-run_stack_handler
+echo run_stack_handler >> /proc/1/fd/1
