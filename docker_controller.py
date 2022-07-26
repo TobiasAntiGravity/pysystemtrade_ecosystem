@@ -231,6 +231,7 @@ def run_daily_container_management(docker_client: docker.client,
                                    samba_password: str,
                                    samba_share: str,
                                    samba_server_ip: str,
+                                   samba_remote_name: str,
                                    path_local_backup_folder: Path = Path('csv_backup')):
     """Main function for managing the pysystemtrade ecosystem containers. Note that;
        docker compose must create containers via docker compose create before script can run
@@ -275,6 +276,7 @@ def run_daily_container_management(docker_client: docker.client,
                                       samba_password=samba_password,
                                       samba_share=samba_share,
                                       samba_server_ip=samba_server_ip,
+                                      samba_remote_name=samba_remote_name,
                                       path_local_backup_folder=path_local_backup_folder)
 
             except exception:
@@ -309,6 +311,7 @@ if __name__ == '__main__':
     samba_password = config['SAMBA_PASSWORD']
     samba_share = config['SAMBA_SHARE']         # share name of remote server
     samba_server_ip = config['SAMBA_SERVER_IP']
+    samba_remote_name = config['SAMBA_REMOTE_NAME']
 
     path_local_backup_folder = Path('/csv_backup')
 
@@ -323,6 +326,7 @@ if __name__ == '__main__':
                                    samba_password=samba_password,
                                    samba_share=samba_share,
                                    samba_server_ip=samba_server_ip,
+                                   samba_remote_name=samba_remote_name,
                                    path_local_backup_folder=path_local_backup_folder)
 
 
