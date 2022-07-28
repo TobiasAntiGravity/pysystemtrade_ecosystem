@@ -199,13 +199,13 @@ def daily_pysys_flow(docker_client: docker.client,
                       docker_client=docker_client,
                       name_suffix=name_suffix)
 
-    except exception:
+    except Exception:
         logger.warning(f'csv backup failed. Continuing program', exc_info=True)
 
     try:
         git_commit_and_push_reports()
 
-    except exception:
+    except Exception:
         logger.info(f'git handling failed. Continuing program', exc_info=True)
 
 
@@ -218,7 +218,7 @@ def daily_pysys_flow(docker_client: docker.client,
                       docker_client=docker_client,
                       name_suffix=name_suffix)
 
-    except exception:
+    except Exception:
         logger.warning(f'db backup failed. Continuing program', exc_info=True)
 
 
@@ -249,7 +249,7 @@ def run_daily_container_management(docker_client: docker.client,
                 run_container(container_name='mongo_db', docker_client=docker_client, name_suffix=name_suffix)
                 #should be down either from daily_pysys_flow, or from startup
 
-            except exception:
+            except Exception:
                 logger.critical(f'Something happened when starting mongo_db, terminating', exc_info=True)
                 exit()
 
@@ -257,7 +257,7 @@ def run_daily_container_management(docker_client: docker.client,
                 run_container(container_name='ib_gateway', docker_client=docker_client, name_suffix=name_suffix)
                 #should be down either from shut down end of this function, or from startup
 
-            except exception:
+            except Exception:
                 logger.critical(f'Something happened when starting ib_gateway, terminating', exc_info=True)
                 exit()
 
@@ -279,7 +279,7 @@ def run_daily_container_management(docker_client: docker.client,
                                       samba_remote_name=samba_remote_name,
                                       path_local_backup_folder=path_local_backup_folder)
 
-            except exception:
+            except Exception:
                 logger.warning('Failed when trying to move csv backup to external share', exc_info=True)
 
             try:
@@ -291,7 +291,7 @@ def run_daily_container_management(docker_client: docker.client,
                                      path_local_backup_folder=path_local_backup_folder,
                                      path_remote_backup_folder=Path('db_backup'))
 
-            except exception:
+            except Exception:
                 logger.warning('Failed when trying to move db backup to external share', exc_info=True)
 
         else:
