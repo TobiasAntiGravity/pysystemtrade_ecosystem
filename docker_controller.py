@@ -195,9 +195,9 @@ def daily_pysys_flow(docker_client: docker.client,
                                          name_suffix=name_suffix)
 
     try:
-        run_container(container_name='csv_backup',
-                      docker_client=docker_client,
-                      name_suffix=name_suffix)
+        run_container_and_wait_to_finish(container_name='csv_backup',
+                                         docker_client=docker_client,
+                                         name_suffix=name_suffix)
 
     except Exception:
         logger.warning(f'csv backup failed. Continuing program', exc_info=True)
@@ -214,9 +214,9 @@ def daily_pysys_flow(docker_client: docker.client,
                    name_suffix=name_suffix)
 
     try:
-        run_container(container_name='db_backup',
-                      docker_client=docker_client,
-                      name_suffix=name_suffix)
+        run_container_and_wait_to_finish(container_name='db_backup',
+                                         docker_client=docker_client,
+                                         name_suffix=name_suffix)
 
     except Exception:
         logger.warning(f'db backup failed. Continuing program', exc_info=True)
