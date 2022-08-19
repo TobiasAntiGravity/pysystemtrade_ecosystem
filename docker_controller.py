@@ -1,5 +1,5 @@
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 import logging
 
@@ -240,10 +240,14 @@ def run_daily_container_management(docker_client: docker.client,
     while True:
 
         now = datetime.now()
+        managment_run_on_this_day = datetime(1971, 1, 1)
 
-        if (int(weekday_start) <= now.isoweekday() <= int(int(weekday_end) - 1)) or \
+        if ((int(weekday_start) <= now.isoweekday() <= int(int(weekday_end) - 1)) or
             (now.isoweekday() >= int(weekday_start) and (now.isoweekday() == int(weekday_end) and
-                                                         now.hour < int(stop_hour))):
+                                                         now.hour < int(stop_hour)))) and \
+                managment_run_on_this_day.date() != now.date():
+
+            managment_run_on_this_day = now
 
             try:
                 run_container(container_name='mongo_db', docker_client=docker_client, name_suffix=name_suffix)
