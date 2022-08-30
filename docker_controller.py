@@ -237,10 +237,11 @@ def run_daily_container_management(docker_client: docker.client,
        docker compose must create containers via docker compose create before script can run
     """
 
+    managment_run_on_this_day = datetime(1971, 1, 1)
+    
     while True:
 
         now = datetime.now()
-        managment_run_on_this_day = datetime(1971, 1, 1)
 
         if ((int(weekday_start) <= now.isoweekday() <= int(int(weekday_end) - 1)) or
             (now.isoweekday() >= int(weekday_start) and (now.isoweekday() == int(weekday_end) and
