@@ -7,6 +7,7 @@ import docker
 from docker.errors import APIError, NotFound
 from dotenv import dotenv_values
 import git
+import pytz
 
 from move_backups import move_backup_csv_files, move_db_backup_files
 
@@ -238,10 +239,10 @@ def run_daily_container_management(docker_client: docker.client,
     """
 
     managment_run_on_this_day = datetime(1971, 1, 1)
-    
+
     while True:
 
-        now = datetime.now()
+        now = datetime.now(pytz.timezone('Europe/London'))
 
         if ((int(weekday_start) <= now.isoweekday() <= int(int(weekday_end) - 1)) or
             (now.isoweekday() >= int(weekday_start) and (now.isoweekday() == int(weekday_end) and
