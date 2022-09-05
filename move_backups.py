@@ -164,9 +164,12 @@ def make_tarfile(path_to_local_backup_dir: Path) -> Path:
     tar_path = Path(path_to_local_backup_dir, tar_file_name)
 
     with tarfile.open(str(tar_path), "w:gz") as tar:
-        tar.add(str(path_to_local_backup_dir), recursive=True)
 
-    logger.info(f'added local backup director to tar archive and created file {tar_path}')
+        for file_path in path_local_backup_folder.glob('*.csv'):
+            tar.add(str(file_path))
+            logger.debug(f'added {file_path} to tar')
+
+    logger.info(f'added created tar archive and created file {tar_path}')
 
     return tar_path
 
