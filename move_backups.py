@@ -98,7 +98,12 @@ class SmbClient(object):
         """remove file from remote share"""
 
         file = '/' + file
-        self.server.deleteFiles(self.sharename, file)
+
+        try:
+            self.server.deleteFiles(self.sharename, file)
+
+        except Exception:
+            self.logger.exception(f'Tried to delete {file} but failed')
 
         self.logger.debug(f'should have deleted file {str(file)}')
 
