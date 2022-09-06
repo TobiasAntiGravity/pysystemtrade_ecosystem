@@ -158,7 +158,7 @@ class SmbClient(object):
 
         for file in list_of_files_to_delete:
             if file_type_includes in file.filename.split('.')[-2:]:
-                self.delete(f'/{subfolder}/{file}')
+                self.delete(f'/{subfolder}/{file.filename}')
                 self.logger.info(f'deleted {file.filename} from samba share, subfolder {subfolder}')
 
             else:
@@ -290,10 +290,10 @@ if __name__ == '__main__':
                          samba_remote_name=samba_remote_name,
                          path_local_backup_folder=Path('csv_backup'))
 
-    move_db_backup_files(samba_user=samba_user,
-                         samba_password=samba_password,
-                         samba_share=samba_share,
-                         samba_server_ip=samba_server_ip,
-                         samba_remote_name=samba_remote_name,
-                         path_local_backup_folder=Path('db_backup'),
-                         path_remote_backup_folder=Path('db_backup'))
+#    move_db_backup_files(samba_user=samba_user,
+#                        samba_password=samba_password,
+#                         samba_share=samba_share,
+#                        samba_server_ip=samba_server_ip,
+#                         samba_remote_name=samba_remote_name,
+#                         path_local_backup_folder=Path('db_backup'),
+#                         path_remote_backup_folder=Path('db_backup'))
