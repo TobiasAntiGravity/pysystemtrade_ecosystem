@@ -140,10 +140,10 @@ class SmbClient(object):
         sorted_dict = dict(sorted(file_creation_dict.items(), key=lambda item: item[1], reverse=True))
 
         sorted_file_name_list = list(sorted_dict.keys())
-        self.logger.debug(f'all backup files on share; {file.filename for file in sorted_file_name_list}')
+        self.logger.debug(f'all backup files on share; {(file.filename for file in sorted_file_name_list)}')
 
         not_most_recent_files = sorted_file_name_list[threshold - 1:]
-        self.logger.debug(f'Files to be deleted from share; {file.filename for file in not_most_recent_files}')
+        self.logger.debug(f'Files to be deleted from share; {(file.filename for file in not_most_recent_files)}')
 
         return not_most_recent_files
 
@@ -155,12 +155,12 @@ class SmbClient(object):
                                                                     threshold=threshold)
 
         for file in list_of_files_to_delete:
-            if file_type_includes in file.filename.split('.')[-1]:
+            if file_type_includes in file.filename.split('.')[-2:]:
                 self.delete(file.filename)
                 self.logger.info(f'deleted {file.filename} from samba share, subfolder {subfolder}')
 
             else:
-                self.logger.debug(f'file {file} not deleted as file name did not included in file ending')
+                self.logger.debug(f'file {file.filename} not deleted as file name did not included in file ending')
 
 
 def make_tarfile(path_to_local_backup_dir: Path) -> Path:
