@@ -125,7 +125,7 @@ class SmbClient(object):
         """get list of files of remote share"""
 
         file_list = self.server.listPath(self.sharename, '/' + subfolder)
-        self.logger.debug(f'Retrieved list {file_list}')
+        self.logger.debug(f'Retrieved list {(file.filename for file in file_list)}')
 
         return file_list
 
@@ -140,10 +140,11 @@ class SmbClient(object):
         sorted_dict = dict(sorted(file_creation_dict.items(), key=lambda item: item[1], reverse=True))
 
         sorted_file_name_list = list(sorted_dict.keys())
-        self.logger.debug(f'all backup files on share; {(file.filename for file in sorted_file_name_list)}')
+
+        self.logger.debug(f'all backup files on share; {[file.filename for file in sorted_file_name_list]}')
 
         not_most_recent_files = sorted_file_name_list[threshold - 1:]
-        self.logger.debug(f'Files to be deleted from share; {(file.filename for file in not_most_recent_files)}')
+        self.logger.debug(f'Files to be deleted from share; {[file.filename for file in not_most_recent_files]}')
 
         return not_most_recent_files
 
@@ -286,7 +287,7 @@ if __name__ == '__main__':
                          samba_share=samba_share,
                          samba_server_ip=samba_server_ip,
                          samba_remote_name=samba_remote_name,
-                         path_local_backup_folder=Path('csv_backup/'))
+                         path_local_backup_folder=Path('csv_backup'))
 
     move_db_backup_files(samba_user=samba_user,
                          samba_password=samba_password,
