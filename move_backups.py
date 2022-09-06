@@ -66,9 +66,9 @@ class SmbClient(object):
             return success
 
     def upload(self, local_file_path: Path, remote_folder_path: Path):
-        """uploads local file to samba share.
+        """uploads local file_path to samba share.
            remote_folder_path: relative path from sharename root folder, to upload folder.
-           local_file_path: file location on local machine.
+           local_file_path: file_path location on local machine.
         """
 
         with open(str(local_file_path.resolve()), 'rb') as data:
@@ -92,20 +92,21 @@ class SmbClient(object):
         with open(file, 'wb') as fileobj:
             self.server.retrieveFile(self.sharename, fileobj)
 
-        self.logger.debug(f"file {file} has been downloaded in current dir")
+        self.logger.debug(f"file_path {file} has been downloaded in current dir")
 
-    def delete(self, file):
-        """remove file from remote share"""
-
-        file = '/' + file
+    def delete(self, file_path: str):
+        """remove file_path from remote share.
+           file_path: str
+             File path relative to share name
+        """
 
         try:
-            self.server.deleteFiles(self.sharename, file)
+            self.server.deleteFiles(self.sharename, file_path)
 
         except Exception:
-            self.logger.exception(f'Tried to delete {file} but failed')
+            self.logger.exception(f'Tried to delete {file_path} but failed')
 
-        self.logger.debug(f'should have deleted file {str(file)}')
+        self.logger.debug(f'should have deleted file_path {str(file_path)}')
 
     def create_directory(self, directory_name: str, relative_path: Path):
         """Creates new directory on relative path on samba share from share folder (sharename). Note that folders
@@ -125,7 +126,7 @@ class SmbClient(object):
         """get list of files of remote share"""
 
         file_list = self.server.listPath(self.sharename, '/' + subfolder)
-        self.logger.debug(f'Retrieved list {(file.filename for file in file_list)}')
+        self.logger.debug(f'Retrieved list {[file.filename for file in file_list]}')
 
         return file_list
 
@@ -157,16 +158,16 @@ class SmbClient(object):
 
         for file in list_of_files_to_delete:
             if file_type_includes in file.filename.split('.')[-2:]:
-                self.delete(file)
+                self.delete(f'/{subfolder}/{file}')
                 self.logger.info(f'deleted {file.filename} from samba share, subfolder {subfolder}')
 
             else:
-                self.logger.debug(f'file {file.filename} not deleted as file name did not included in file ending')
+                self.logger.debug(f'file_path {file.filename} not deleted as file_path name did not included in file_path ending')
 
 
 def make_tarfile(path_to_local_backup_dir: Path) -> Path:
-    """Recursively adds all files in passed folder to tar file. Returns path to created file,
-       tarfile is stored in the local backup directory. Will be deleted before new tar file is made
+    """Recursively adds all files in passed folder to tar file_path. Returns path to created file_path,
+       tarfile is stored in the local backup directory. Will be deleted before new tar file_path is made
     """
 
     backup_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
@@ -179,7 +180,7 @@ def make_tarfile(path_to_local_backup_dir: Path) -> Path:
             tar.add(str(file_path))
             logger.debug(f'added {file_path} to tar')
 
-    logger.info(f'added created tar archive and created file {tar_path}')
+    logger.info(f'added created tar archive and created file_path {tar_path}')
 
     return tar_path
 
@@ -190,7 +191,7 @@ def delete_old_tar_files(path_to_local_backup_dir: Path):
 
         for file_path in path_to_local_backup_dir.glob("*.tar.gz"):
             file_path.unlink()
-            logger.info(f'Old file deleted {str(file_path)}')
+            logger.info(f'Old file_path deleted {str(file_path)}')
 
     else:
         logger.debug(f'There were no files to be deleted')
@@ -203,10 +204,10 @@ def move_backup_csv_files(samba_user: str,
                           samba_remote_name: str,
                           path_local_backup_folder: Path = Path('csv_backup'),
                           path_remote_backup_folder: Path = Path('csv_backup')):
-    """Creates a tar file out of arctic csv backup files and moves it to a to samba share.
+    """Creates a tar file_path out of arctic csv backup files and moves it to a to samba share.
        Removes old tar files
        Deletes the csv files, so that folder is ready for new backup files.
-       Keeps current tar file in backup folder
+       Keeps current tar file_path in backup folder
     """
     smb = SmbClient(ip=samba_server_ip,
                     username=samba_user,
