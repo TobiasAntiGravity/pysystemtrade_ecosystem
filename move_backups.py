@@ -178,7 +178,7 @@ def make_tarfile(path_to_local_backup_dir: Path) -> Path:
 
         for folder_path in path_to_local_backup_dir.iterdir():
             if folder_path.is_dir():
-                tar.add(str(folder_path))
+                tar.add(str(folder_path), recursive=True)
                 logger.debug(f'added folder; {folder_path} to tar')
 
     logger.info(f'added created tar archive and created file_path {tar_path}')
