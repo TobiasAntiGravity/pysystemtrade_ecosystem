@@ -176,7 +176,7 @@ def make_tarfile(path_to_local_backup_dir: Path) -> Path:
 
     with tarfile.open(str(tar_path), "w:gz") as tar:
 
-        for file_path in path_to_local_backup_dir.glob('*[!].tar', recursive=True):
+        for file_path in path_to_local_backup_dir.glob(pathname='**[!].tar', recursive=True):
             tar.add(str(file_path))
             logger.debug(f'added {file_path} to tar')
 
