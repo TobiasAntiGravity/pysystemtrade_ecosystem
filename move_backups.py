@@ -155,7 +155,7 @@ class SmbClient(object):
                                                                     threshold=threshold)
 
         for file in list_of_files_to_delete:
-            if file_type_includes in file.split('.')[-1]:
+            if file_type_includes in file.filename.split('.')[-1]:
                 self.delete(file.filename)
                 self.logger.info(f'deleted {file.filename} from samba share, subfolder {subfolder}')
 
