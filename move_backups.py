@@ -165,7 +165,7 @@ class SmbClient(object):
                 self.logger.debug(f'file_path {file.filename} not deleted as file_path name did not included in file_path ending')
 
 
-def make_tarfile(path_to_local_backup_dir: Path) -> Path:
+def make_csv_tarfile(path_to_local_backup_dir: Path) -> Path:
     """Recursively adds all files in passed folder to tar file_path. Returns path to created file_path,
        tarfile is stored in the local backup directory. Will be deleted before new tar file_path is made
     """
@@ -220,7 +220,7 @@ def move_backup_csv_files(samba_user: str,
 
         delete_old_tar_files(path_to_local_backup_dir=path_local_backup_folder)
 
-        path_to_tarfile = make_tarfile(path_to_local_backup_dir=path_local_backup_folder)
+        path_to_tarfile = make_csv_tarfile(path_to_local_backup_dir=path_local_backup_folder)
 
         smb.upload(local_file_path=path_to_tarfile,
                    remote_folder_path=path_remote_backup_folder)
