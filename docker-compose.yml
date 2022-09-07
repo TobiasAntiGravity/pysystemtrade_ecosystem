@@ -101,7 +101,7 @@ services:
           max-file: "3"
 
 
-    ib_gateway:
+  ib_gateway:
       build:
         context: ./ib_gateway
         dockerfile: ./Dockerfile
