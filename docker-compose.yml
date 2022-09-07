@@ -189,7 +189,7 @@ services:
         - mongo_db:/data/db
         - mongo_conf:/data/configdb
         - ./db_backup:/backup
-      command: sh -c "tar -cvf /backup/backup_mongo.tar.gz /data/"
+      command: sh -c "tar -zcvf /backup/backup_mongo.tar.gz /data/"
       init: true
       logging:
         options:
