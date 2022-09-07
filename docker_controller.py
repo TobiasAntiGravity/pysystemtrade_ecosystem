@@ -324,7 +324,7 @@ if __name__ == '__main__':
     samba_server_ip = config['SAMBA_SERVER_IP']
     samba_remote_name = config['SAMBA_REMOTE_NAME']
 
-    path_local_backup_folder = Path('/csv_backup')
+    path_local_backup_folder = Path('csv_backup')
 
     docker_client = docker.DockerClient(base_url='unix://var/run/docker.sock')
 
