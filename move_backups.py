@@ -234,15 +234,6 @@ def move_backup_csv_files(samba_user: str,
         logger.critical('failed to connect to samba share, could not move to external storage')
 
 
-def generate_backup_folder_name() -> str:
-    """Generates a backup folder name that includes move time"""
-
-    backup_time = datetime.now().strftime("%Y_%m_%d_%H_%M")
-    folder_name = f'db_backup_{backup_time}'
-    logger.debug(f"Folder name generated: {folder_name}")
-
-    return folder_name
-
 def move_db_backup_files(samba_user: str,
                          samba_password: str,
                          samba_share: str,
@@ -264,11 +255,15 @@ def move_db_backup_files(samba_user: str,
 
     if smb.connect():
 
-        directory_name = generate_backup_folder_name()
-        smb.create_directory( directory_name=directory_name, relative_path=path_remote_backup_folder)
+        try:
+            for file_path in path_local_backup_folder.glob('*.tar.gz'):
+                smb.upload(local_file_path=file_path, remote_folder_path=path_remote_backup_folder)
 
-        for file_path in path_local_backup_folder.glob('*.tar'):
-            smb.upload(local_file_path=file_path, remote_folder_path=path_remote_backup_folder / directory_name)
+        except Exception:
+            logger.exception(f'Something happened when trying to upload {str(file_path)} to samba')
+
+        else:
+            logger.info(f'{str(file_path)} uploaded to samba server')
 
     else:
         logger.critical('failed to connect to samba share, could not move to external storage')
