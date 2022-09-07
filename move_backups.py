@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import List
 
 from smb.SMBConnection import SMBConnection
-from smb.base import SharedFile
+from smb.base import SharedFile, NotConnectedError
 from smb.smb_structs import OperationFailure
 from dotenv import dotenv_values
 
@@ -79,9 +79,9 @@ class SmbClient(object):
                                                        path=remote_path_str,
                                                        file_obj=data)
 
-            except OperationFailure as e:
+            except (OperationFailure, NotConnectedError):
                 msg = f'Exception occured. File {str(local_file_path)} upload to samba share probably failed.'
-                msg += 'Error is read failure according to documentation'
+                msg += f'Tried to upload to the following remote path; {remote_path_str}'
                 self.logger.exception(msg)
 
             else:
