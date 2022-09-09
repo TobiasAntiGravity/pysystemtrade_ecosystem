@@ -285,6 +285,9 @@ def move_db_backup_files(samba_user: str,
                 msg += " needs to be checked"
                 logger.warning(msg)
 
+            #Delete local backup file, so that we know if new backup files is generated next time
+            file_path.unlink()
+
 
 if __name__ == '__main__':
 
