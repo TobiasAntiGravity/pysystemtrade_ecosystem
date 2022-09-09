@@ -85,7 +85,9 @@ class SmbClient(object):
                 self.logger.exception(msg)
 
             else:
-                self.logger.debug(f"{bytes_uploaded} bytes of {str(local_file_path)} uploaded to samba")
+                msg = f"{bytes_uploaded} bytes of {str(local_file_path)} uploaded to"
+                msg += f"samba share {self.sharename} in the subfolder {remote_path_str / local_file_path.name}"
+                self.logger.debug(msg)
 
     def download(self, file: str):
 
