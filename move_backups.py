@@ -167,13 +167,21 @@ class SmbClient(object):
                 self.logger.debug(f'file_path {file.filename} not deleted as file_path name did not included in file_path ending')
 
 
+def generate_tar_gz_filename_with_timestamp_suffix(prefix: str):
+    """Generates timestamp suffix, appends to passed prefix"""
+
+    backup_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+    tar_file_name = f'{prefix}_{backup_time}.tar.gz'
+
+    return tar_file_name
+
+
 def make_csv_tarfile(path_to_local_backup_dir: Path) -> Path:
     """Recursively adds all files in passed folder to tar file_path. Returns path to created file_path,
        tarfile is stored in the local backup directory. Will be deleted before new tar file_path is made
     """
 
-    backup_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-    tar_file_name = f'csv_backup_{backup_time}.tar.gz'
+    tar_file_name = generate_tar_gz_filename_with_timestamp_suffix(prefix="csv_backup")
     tar_path = Path(path_to_local_backup_dir, tar_file_name)
 
     with tarfile.open(str(tar_path), "w:gz") as tar:
@@ -257,18 +265,25 @@ def move_db_backup_files(samba_user: str,
 
     if smb.connect():
 
-        try:
-            for file_path in path_local_backup_folder.glob('*.tar.gz'):
-                smb.upload(local_file_path=file_path, remote_folder_path=path_remote_backup_folder)
+        generator_compressed_files_in_folder = path_local_backup_folder.glob('*.tar.gz')
 
-        except Exception:
-            logger.exception(f'Something happened when trying to upload {str(file_path)} to samba')
+        try:
+            file_path = next(generator_compressed_files_in_folder)
+
+        except StopIteration:
+            msg = f"No tar.gz files found in {path_local_backup_folder}. Therefore no db backup moved"
+            logger.exception(msg)
 
         else:
-            logger.info(f'{str(file_path)} uploaded to samba server')
+            new_file_name = generate_tar_gz_filename_with_timestamp_suffix(prefix='db_backup')
+            path_with_new_file_name = file_path.with_name(new_file_name)
+            smb.upload(local_file_path=path_with_new_file_name, remote_folder_path=path_remote_backup_folder)
 
-    else:
-        logger.critical('failed to connect to samba share, could not move to external storage')
+            if next(generator_compressed_files_in_folder, None) is not None:
+                msg = f"It appears that there was more than one tar.gz file in {path_local_backup_folder}"
+                msg += f" First item was treated as the correct backup file {file_path}, but might not be"
+                msg += " needs to be checked"
+                logger.warning(msg)
 
 
 if __name__ == '__main__':
