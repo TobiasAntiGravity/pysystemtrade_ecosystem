@@ -65,6 +65,11 @@ class SmbClient(object):
             self.logger.info(f'No exception thrown. SmbClient returned bool; {success}')
             return success
 
+    def close(self):
+
+        self.server.close()
+
+
     def upload(self, local_file_path: Path, remote_folder_path: Path):
         """uploads local file_path to samba share.
            remote_folder_path: relative path from sharename root folder, to upload folder.
@@ -240,6 +245,8 @@ def move_backup_csv_files(samba_user: str,
         for file in path_local_backup_folder.glob('**/*.csv'):
             file.unlink()
 
+        smb.close()
+
     else:
         logger.critical('failed to connect to samba share, could not move to external storage')
 
@@ -287,6 +294,8 @@ def move_db_backup_files(samba_user: str,
 
             #Delete local backup file, so that we know if new backup files is generated next time
             file_path.unlink()
+
+        smb.close()
 
 
 if __name__ == '__main__':
