@@ -233,7 +233,8 @@ def run_daily_container_management(docker_client: docker.client,
                                    samba_share: str,
                                    samba_server_ip: str,
                                    samba_remote_name: str,
-                                   path_local_backup_folder: Path = Path('csv_backup')):
+                                   path_local_csv_backup_folder: Path = Path('csv_backup'),
+                                   path_local_db_backup_folder: Path = Path('db_backup')):
     """Main function for managing the pysystemtrade ecosystem containers. Note that;
        docker compose must create containers via docker compose create before script can run
     """
@@ -284,7 +285,7 @@ def run_daily_container_management(docker_client: docker.client,
                                           samba_share=samba_share,
                                           samba_server_ip=samba_server_ip,
                                           samba_remote_name=samba_remote_name,
-                                          path_local_backup_folder=path_local_backup_folder)
+                                          path_local_backup_folder=path_local_csv_backup_folder)
 
                 except Exception:
                     logger.warning('Failed when trying to move csv backup to external share', exc_info=True)
@@ -295,7 +296,7 @@ def run_daily_container_management(docker_client: docker.client,
                                          samba_share=samba_share,
                                          samba_server_ip=samba_server_ip,
                                          samba_remote_name=samba_remote_name,
-                                         path_local_backup_folder=path_local_backup_folder,
+                                         path_local_backup_folder=path_local_db_backup_folder,
                                          path_remote_backup_folder=Path('db_backup'))
 
                 except Exception:
@@ -324,7 +325,8 @@ if __name__ == '__main__':
     samba_server_ip = config['SAMBA_SERVER_IP']
     samba_remote_name = config['SAMBA_REMOTE_NAME']
 
-    path_local_backup_folder = Path('csv_backup')
+    path_local_csv_backup_folder = Path('csv_backup')
+    path_local_db_backup_folder = Path('db_backup')
 
     docker_client = docker.DockerClient(base_url='unix://var/run/docker.sock')
 
@@ -338,6 +340,7 @@ if __name__ == '__main__':
                                    samba_share=samba_share,
                                    samba_server_ip=samba_server_ip,
                                    samba_remote_name=samba_remote_name,
-                                   path_local_backup_folder=path_local_backup_folder)
+                                   path_local_csv_backup_folder=path_local_csv_backup_folder,
+                                   path_local_db_backup_folder=path_local_db_backup_folder)
 
 
