@@ -341,5 +341,3 @@ if __name__ == '__main__':
                                    path_local_backup_folder=path_local_backup_folder)
 
 
-# todo: should implement surveillance on disk usage / docker cleaning if necessary
-# todo: notification of warnings and critical should be implemented.
