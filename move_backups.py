@@ -286,6 +286,9 @@ def move_db_backup_files(samba_user: str,
         else:
             new_file_name = generate_tar_gz_filename_with_timestamp_suffix(prefix='db_backup')
             path_with_new_file_name = file_path.with_name(new_file_name)
+            msg = f"{file_path} changed name to {path_with_new_file_name}, before upload"
+            logger.debug(msg)
+            
             smb.upload(local_file_path=path_with_new_file_name, remote_folder_path=path_remote_backup_folder)
 
             if next(generator_compressed_files_in_folder, None) is not None:
