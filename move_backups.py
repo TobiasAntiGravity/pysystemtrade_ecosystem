@@ -78,6 +78,8 @@ class SmbClient(object):
 
         with open(str(local_file_path.resolve()), 'rb') as data:
             remote_path_str = str(remote_folder_path / local_file_path.name)
+            msg = f"Opened file {remote_path_str} as step before uploading to samba server"
+            self.logger.debug(msg)
 
             try:
                 bytes_uploaded = self.server.storeFile(service_name=self.sharename,
