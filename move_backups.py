@@ -227,6 +227,10 @@ def move_backup_csv_files(samba_user: str,
        Deletes the csv files, so that folder is ready for new backup files.
        Keeps current tar file_path in backup folder
     """
+
+    delete_old_tar_files(path_to_local_backup_dir=path_local_backup_folder)
+    path_to_tarfile = make_csv_tarfile(path_to_local_backup_dir=path_local_backup_folder)
+
     smb = SmbClient(ip=samba_server_ip,
                     username=samba_user,
                     password=samba_password,
@@ -234,10 +238,6 @@ def move_backup_csv_files(samba_user: str,
                     sharename=samba_share)
 
     if smb.connect():
-
-        delete_old_tar_files(path_to_local_backup_dir=path_local_backup_folder)
-
-        path_to_tarfile = make_csv_tarfile(path_to_local_backup_dir=path_local_backup_folder)
 
         smb.upload(local_file_path=path_to_tarfile,
                    remote_folder_path=path_remote_backup_folder)
@@ -287,7 +287,7 @@ def move_db_backup_files(samba_user: str,
             new_file_name = generate_tar_gz_filename_with_timestamp_suffix(prefix='db_backup')
             path_with_new_file_name = file_path.with_name(new_file_name)
             file_path.replace(path_with_new_file_name)
-            
+
             msg = f"{file_path} changed name to {path_with_new_file_name}, before upload"
             logger.debug(msg)
 
