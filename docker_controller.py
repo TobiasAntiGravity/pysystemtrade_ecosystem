@@ -288,7 +288,7 @@ def run_daily_container_management(docker_client: docker.client,
                                           path_local_backup_folder=path_local_csv_backup_folder)
 
                 except Exception:
-                    logger.warning('Failed when trying to move csv backup to external share', exc_info=True)
+                    logger.warning('An excpetion occured when running move_backup_csv_files', exc_info=True)
 
                 try:
                     move_db_backup_files(samba_user=samba_user,
