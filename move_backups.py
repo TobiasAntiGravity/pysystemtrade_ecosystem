@@ -93,7 +93,7 @@ class SmbClient(object):
 
             else:
                 msg = f"{bytes_uploaded} bytes of {str(local_file_path)} uploaded to"
-                msg += f"samba share {self.sharename} in the subfolder {remote_path_str / local_file_path.name}"
+                msg += f"samba share {self.sharename} in the subfolder {remote_path_str + '/' + local_file_path.name}"
                 self.logger.debug(msg)
 
     def download(self, file: str):
@@ -243,14 +243,14 @@ def move_backup_csv_files(samba_user: str,
                    remote_folder_path=path_remote_backup_folder)
         smb.delete_file_not_x_most_recent(subfolder=str(path_remote_backup_folder), threshold=5)
 
-        # delete all csv files backed up recursively.
-        for file in path_local_backup_folder.glob('**/*.csv'):
-            file.unlink()
-
         smb.close()
 
     else:
         logger.critical('failed to connect to samba share, could not move to external storage')
+
+    for file in path_local_backup_folder.glob('**/*.csv'):
+        file.unlink()
+
 
 
 def move_db_backup_files(samba_user: str,
