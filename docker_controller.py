@@ -300,7 +300,7 @@ def run_daily_container_management(docker_client: docker.client,
                                          path_remote_backup_folder=Path('db_backup'))
 
                 except Exception:
-                    logger.warning('Failed when trying to move db backup to external share', exc_info=True)
+                    logger.warning('An excpetion occured when running move_db_backup_files', exc_info=True)
 
             else:
                 logger.debug('Daily run already done during this session. waiting until new day starts')
