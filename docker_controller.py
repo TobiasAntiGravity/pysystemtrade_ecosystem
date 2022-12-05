@@ -75,9 +75,7 @@ def wait_until_containers_has_finished(list_of_containers_to_finish: list,
                     one_debug_statement = True
 
 
-def run_container(container_name: str, docker_client: docker.client, name_suffix: str):
-    """Starts a container, handles exception, but re-raises exception for handling further upstream"""
-
+def get_container_object(container_name: str, docker_client: docker.client, name_suffix: str):
     try:
         container_object = docker_client.containers.get(container_id=container_name + name_suffix)
 
@@ -90,6 +88,15 @@ def run_container(container_name: str, docker_client: docker.client, name_suffix
         logger.critical(f'APIError - Failed to retrieve {container_name} container, stopping program', exc_info=True)
         raise e
 
+    return container_object
+
+
+def run_container(container_name: str, docker_client: docker.client, name_suffix: str):
+    """Starts a container, handles exception, but re-raises exception for handling further upstream"""
+
+    container_object = get_container_object(container_name=container_name, docker_client=docker_client,
+                                            name_suffix=name_suffix)
+
     if container_object.status != 'running':
         container_object.start()
         logger.info(f'Container {container_name} was not running. Started it')
@@ -99,6 +106,19 @@ def run_container(container_name: str, docker_client: docker.client, name_suffix
         msg = f'Container {container_name} was restarted. Should not be running, probably stale. '
         msg += f'Need to restart processes'
         logger.warning(msg)
+
+
+def check_container_running(container_name: str, docker_client: docker.client, name_suffix: str):
+    '''Checks that the container name passed is a container and that is has status "running"'''
+
+    container_object = get_container_object(container_name=container_name, docker_client=docker_client,
+                                            name_suffix=name_suffix)
+
+    if container_object.status == 'running':
+        return True
+
+    else:
+        return False
 
 
 def run_container_and_wait_to_finish(container_name: str, docker_client: docker.client, name_suffix: str):
@@ -262,22 +282,19 @@ def run_daily_container_management(docker_client: docker.client,
                     exit()
 
                 try:
-                    run_container(container_name='ib_gateway', docker_client=docker_client, name_suffix=name_suffix)
-                    # should be down either from shut down end of this function, or from startup
+                    check_container_running(container_name='ib_gateway', docker_client=docker_client,
+                                            name_suffix=name_suffix)
+                    # Has to be manually started because of two factor authentication.
 
                 except Exception:
                     logger.critical(f'Something happened when starting ib_gateway, terminating', exc_info=True)
                     exit()
 
-                logger.info('Giving ib_gateway 30 sec to create connection before starting daily sequence')
+                logger.info('Giving mongo db some seconds to start')
                 time.sleep(30)
 
                 daily_pysys_flow(docker_client=docker_client,
                                  name_suffix=name_suffix)
-
-                stop_container(container_name='ib_gateway',
-                               docker_client=docker_client,
-                               name_suffix=name_suffix)
 
                 try:
                     move_backup_csv_files(samba_user=samba_user,
