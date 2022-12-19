@@ -217,6 +217,9 @@ volumes:
     name: mongo_db_volume${NAME_SUFFIX}
   mongo_conf:
     name: mongo_conf_volume${NAME_SUFFIX}
+  gateway_jts:
+    name: gateway_jts_volume${NAME_SUFFIX}
+
 
 networks:
   channel:
