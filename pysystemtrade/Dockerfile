@@ -40,7 +40,7 @@ COPY --from=builder /opt/projects /opt/projects
 
 WORKDIR /opt/projects/pysystemtrade
 
-RUN pip install -e .
+RUN pip3 install -e .
 
 RUN mkdir command_scripts
 COPY ./command_scripts /opt/projects/pysystemtrade/command_scripts
