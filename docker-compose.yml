@@ -116,6 +116,8 @@ services:
         TRADING_MODE: ${TRADINGMODE}
         TWS_PORT: 4002
         VNC_PORT: 5900
+      volumes:
+        - gateway_jts:/root/Jts
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.3
