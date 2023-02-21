@@ -30,6 +30,28 @@ services:
           max-size: "10m"
           max-file: "3"
 
+  price_updates:
+      image: pysystem_image
+      container_name: price_updates${NAME_SUFFIX}
+      restart: on-failure
+      environment:
+        IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
+        PYSYS_CODE: ${PYSYS_CODE}
+      command: ["/bin/bash", "-c", "command_scripts/daily_prices_updates_commands.bash"]
+      depends_on:
+        - ib_gateway
+        - mongo_db
+      networks:
+        channel:
+          ipv4_address: ${IPV4_NETWORK_PART}0.5
+      stdin_open: true
+      tty: true
+      init: true
+      logging:
+        options:
+          max-size: "10m"
+          max-file: "3"
+
   capital_update:
       image: pysystem_image
       container_name: capital_update${NAME_SUFFIX}

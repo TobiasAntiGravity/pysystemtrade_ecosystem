@@ -199,7 +199,7 @@ def daily_pysys_flow(docker_client: docker.client,
                                          docker_client=docker_client,
                                          name_suffix=name_suffix)
 
-    continous_containers = ['stack_handler', 'capital_update']
+    continous_containers = ['stack_handler', 'capital_update', 'price_updates']
 
     for container_name in continous_containers:
         run_container(container_name=container_name,
