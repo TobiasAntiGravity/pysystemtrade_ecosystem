@@ -3,7 +3,7 @@ FROM python:3.8.12 as builder
 # LABEL
 LABEL maintainer="tobias@anti-gravity.as"
 LABEL version="0.1"
-LABEL description="This is custom Docker Image for creating a pysystemtrade container in the pysystemtrade_ecosystem"
+LABEL description="This is custom Docker Image for creating a jupyterlab container in the pysystemtrade_ecosystem"
 
 ARG GIT_TOKEN
 
@@ -11,13 +11,6 @@ RUN mkdir /opt/projects
 RUN git clone -b my_branch https://${GIT_TOKEN}:@github.com/GITUSERNAME/private_pysystemtrade_repo.git /opt/projects/pysystemtrade
 
 FROM python:3.8.12 as final_stage
-
-ARG SCRIPT_PATH=$SCRIPT_PATH
-
-ENV IPV4_NETWORK_PART=$IPV4_NETWORK_PART
-ENV PYSYS_CODE=$PYSYS_CODE
-ENV SCRIPT_PATH=$SCRIPT_PATH
-ENV PATH "$PATH:$SCRIPT_PATH"
 
 RUN  ln -sf /usr/share/zoneinfo/Europe/London /etc/timezone && \
      ln -sf /usr/share/zoneinfo/Europe/London /etc/localtime
@@ -31,10 +24,13 @@ RUN mkdir /opt/projects/pysystemtrade
 COPY --from=builder /opt/projects/pysystemtrade/requirements.txt /opt/projects/requirements.txt
 
 RUN pip3 install --upgrade pip
+RUN pip3 install sqlalchemy==1.3.22
+RUN pip3 install psycopg2-binary
 
 WORKDIR /opt/projects
 
 RUN pip3 install --requirement requirements.txt
+RUN pip3 install jupyterlab
 
 COPY --from=builder /opt/projects /opt/projects
 
@@ -42,10 +38,8 @@ WORKDIR /opt/projects/pysystemtrade
 
 RUN pip3 install -e .
 
-RUN mkdir command_scripts
-COPY ./command_scripts /opt/projects/pysystemtrade/command_scripts
-COPY run_monitor_once.py /opt/projects/pysystemtrade/run_monitor_once.py
+COPY ./jupyter_server_config.py /usr/jupyter_server_config.py
 
-RUN mkdir /home/echos
-RUN mkdir /home/csv_backup
 RUN mkdir /home/reports
+
+ENTRYPOINT jupyter-lab --allow-root --no-browser --port=8888  --ip=0.0.0.0 --config=/usr/jupyter_server_config.py

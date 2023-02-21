@@ -2,31 +2,128 @@ version: '3.9'
 
 services:
 
-    pysystemstrade:
+  stack_handler:
+      image: pysystem_image
       build:
         context: ./pysystemtrade
         dockerfile: ./Dockerfile
         args:
-          GIT_TOKEN: add_personal_access_token_here
+          GIT_TOKEN: ${GIT_TOKEN}
           SCRIPT_PATH: ${SCRIPT_PATH}
-          ECHO_PATH: ${ECHO_PATH}
-      container_name: pysystemtrade${NAME_SUFFIX}
-      restart: always
+      container_name: stack_handler${NAME_SUFFIX}
+      restart: on-failure
       environment:
         IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
         PYSYS_CODE: ${PYSYS_CODE}
+      command: ["/bin/bash", "-c", "command_scripts/stack_handler_commands.bash"]
       depends_on:
         - ib_gateway
         - mongo_db
-      volumes:
-        - ./csv_backup:/home/csv_backup
+      networks:
+        channel:
+          ipv4_address: ${IPV4_NETWORK_PART}0.4
+      stdin_open: true
+      tty: true
+      init: true
+      logging:
+        options:
+          max-size: "10m"
+          max-file: "3"
+
+  price_updates:
+      image: pysystem_image
+      container_name: price_updates${NAME_SUFFIX}
+      restart: on-failure
+      environment:
+        IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
+        PYSYS_CODE: ${PYSYS_CODE}
+      command: ["/bin/bash", "-c", "command_scripts/daily_prices_updates_commands.bash"]
+      depends_on:
+        - ib_gateway
+        - mongo_db
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.5
       stdin_open: true
       tty: true
+      init: true
+      logging:
+        options:
+          max-size: "10m"
+          max-file: "3"
 
-    ib_gateway:
+  capital_update:
+      image: pysystem_image
+      container_name: capital_update${NAME_SUFFIX}
+      restart: on-failure
+      environment:
+        IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
+        PYSYS_CODE: ${PYSYS_CODE}
+      command: ["/bin/bash", "-c", "command_scripts/capital_update_commands.bash"]
+      depends_on:
+        - ib_gateway
+        - mongo_db
+        - stack_handler   # needed to avoid building same image twice
+      networks:
+        channel:
+          ipv4_address: ${IPV4_NETWORK_PART}0.9
+      stdin_open: true
+      tty: true
+      init: true
+      logging:
+        options:
+          max-size: "10m"
+          max-file: "3"
+
+  cleaner:
+      image: pysystem_image
+      container_name: cleaner${NAME_SUFFIX}
+      restart: on-failure
+      environment:
+        IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
+        PYSYS_CODE: ${PYSYS_CODE}
+      command: ["/bin/bash", "-c", "command_scripts/cleaner_commands.bash"]
+      depends_on:
+        - mongo_db
+        - stack_handler   # needed to avoid building same image twice
+      networks:
+        channel:
+          ipv4_address: ${IPV4_NETWORK_PART}0.10
+      stdin_open: true
+      tty: true
+      init: true
+      logging:
+        options:
+          max-size: "200k"
+          max-file: "1"
+
+  daily_processes:
+      image: pysystem_image
+      container_name: daily_processes${NAME_SUFFIX}
+      environment:
+        IPV4_NETWORK_PART: ${IPV4_NETWORK_PART}
+        PYSYS_CODE: ${PYSYS_CODE}
+      command: ["/bin/bash", "-c", "command_scripts/daily_processes_commands.bash"]
+      depends_on:
+        - ib_gateway
+        - mongo_db
+        - stack_handler   # needed to avoid building same image twice
+      volumes:
+        - ./reports:/home/reports
+        - ./backtests:/home/backtests
+      networks:
+        channel:
+          ipv4_address: ${IPV4_NETWORK_PART}0.8
+      stdin_open: true
+      tty: true
+      init: true
+      logging:
+        options:
+          max-size: "10m"
+          max-file: "3"
+
+
+  ib_gateway:
       build:
         context: ./ib_gateway
         dockerfile: ./Dockerfile
@@ -36,48 +133,94 @@ services:
         - "4002:4002"
         - "5900:5900"
       environment:
-        TWSUSERID: "user_id"
-        TWSPASSWORD: "password"
+        TWSUSERID: ${TWSUSERID}
+        TWSPASSWORD: ${TWSPASSWORD}
+        TRADING_MODE: ${TRADINGMODE}
+        TWS_PORT: 4002
+        VNC_PORT: 5900
+      volumes:
+        - gateway_jts:/root/Jts
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.3
+      logging:
+        options:
+          max-size: "1m"
+          max-file: "2"
 
-    mongo_db:
+  mongo_db:
       container_name: mongo_db${NAME_SUFFIX}
       image: mongo
-      restart: always
+      restart: on-failure
       volumes:
         - mongo_db:/data/db
         - mongo_conf:/data/configdb
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.2
-          
-    ipython:
+      logging:
+        options:
+          max-size: "5m"
+          max-file: "3"
+
+  jupyter:
       build:
-        context: ./ipython
+        context: jupyter
         dockerfile: ./Dockerfile
         args:
           GIT_TOKEN: add_personal_access_token_here
-          ECHO_PATH: ${ECHO_PATH}
-      container_name: ipython${NAME_SUFFIX}
+      container_name: jupyter${NAME_SUFFIX}
       restart: always
       ports:
         - "8888:8888"
+      volumes:
+        - ./reports:/home/reports
+        - ./csv_backup:/home/csv_backup
+        - ./backtests:/home/backtests
+      depends_on:
+        - ib_gateway
+        - mongo_db
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.6
-    
-    db-backup:
-      image: alpine   
-      profiles: ["backup"]      
+      logging:
+        options:
+          max-size: "200k"
+          max-file: "1"
+
+  csv_backup:
+      image: pysystem_image
+      depends_on:
+        - stack_handler   # needed to avoid building same image twice
+        - mongo_db
+      container_name: csv_backup${NAME_SUFFIX}
+      networks:
+        channel:
+          ipv4_address: ${IPV4_NETWORK_PART}0.7
+      volumes:
+        - ./csv_backup:/home/csv_backup
+      command: sh -c "cd sysproduction/linux/scripts; backup_arctic_to_csv"
+      init: true
+      logging:
+        options:
+          max-size: "200k"
+          max-file: "1"
+
+  db_backup:
+      image: alpine
+      container_name: db_backup${NAME_SUFFIX}
       volumes:
         - mongo_db:/data/db
         - mongo_conf:/data/configdb
         - ./db_backup:/backup
-      command: sh -c "tar -cvf /backup/backup_db.tar /data/db; tar -cvf /backup/backup_conf.tar /data/configdb"
+      command: sh -c "tar -zcvf /backup/backup_mongo.tar.gz /data/"
+      init: true
+      logging:
+        options:
+          max-size: "200k"
+          max-file: "1"
 
-    db-restore:
+  db_restore:
       image: alpine    
       profiles: ["restore"]
       volumes:
@@ -85,12 +228,20 @@ services:
         - mongo_conf:/data/configdb
         - ./db_backup:/backup
       command: sh -c "cd /data/ && tar -xvf /backup/backup_db.tar --strip 1; cd /data/ && tar -xvf /backup/backup_conf.tar --strip 1"
-      
+      init: true
+      logging:
+        options:
+          max-size: "200k"
+          max-file: "1"
+
 volumes:
   mongo_db:
     name: mongo_db_volume${NAME_SUFFIX}
   mongo_conf:
     name: mongo_conf_volume${NAME_SUFFIX}
+  gateway_jts:
+    name: gateway_jts_volume${NAME_SUFFIX}
+
 
 networks:
   channel:
