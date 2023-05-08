@@ -49,3 +49,4 @@ COPY run_monitor_once.py /opt/projects/pysystemtrade/run_monitor_once.py
 RUN mkdir /home/echos
 RUN mkdir /home/csv_backup
 RUN mkdir /home/reports
+RUN mkdir /home/logs

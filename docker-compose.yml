@@ -19,6 +19,8 @@ services:
       depends_on:
         - ib_gateway
         - mongo_db
+      volumes:
+        - ./logs/stack_handler:/home/logs
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.4
@@ -41,6 +43,8 @@ services:
       depends_on:
         - ib_gateway
         - mongo_db
+      volumes:
+        - ./logs/price_updates:/home/logs
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.5
@@ -64,6 +68,8 @@ services:
         - ib_gateway
         - mongo_db
         - stack_handler   # needed to avoid building same image twice
+      volumes:
+        - ./logs/capital_update:/home/logs
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.9
@@ -111,6 +117,7 @@ services:
       volumes:
         - ./reports:/home/reports
         - ./backtests:/home/backtests
+        - ./logs/daily_processes:/home/logs
       networks:
         channel:
           ipv4_address: ${IPV4_NETWORK_PART}0.8
@@ -177,6 +184,7 @@ services:
         - ./reports:/home/reports
         - ./csv_backup:/home/csv_backup
         - ./backtests:/home/backtests
+        - ./logs/jupyter:/home/jupyter
       depends_on:
         - ib_gateway
         - mongo_db

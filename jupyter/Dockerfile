@@ -41,5 +41,6 @@ RUN pip3 install -e .
 COPY ./jupyter_server_config.py /usr/jupyter_server_config.py
 
 RUN mkdir /home/reports
+RUN mkdir /home/logs
 
 ENTRYPOINT jupyter-lab --allow-root --no-browser --port=8888  --ip=0.0.0.0 --config=/usr/jupyter_server_config.py
