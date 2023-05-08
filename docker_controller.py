@@ -199,14 +199,14 @@ def daily_pysys_flow(docker_client: docker.client,
                                          docker_client=docker_client,
                                          name_suffix=name_suffix)
 
-    continous_containers = ['stack_handler', 'capital_update', 'price_updates']
+    continuous_containers = ['stack_handler', 'capital_update', 'price_updates']
 
-    for container_name in continous_containers:
+    for container_name in continuous_containers:
         run_container(container_name=container_name,
                       docker_client=docker_client,
                       name_suffix=name_suffix)
 
-    wait_until_containers_has_finished(list_of_containers_to_finish=continous_containers,
+    wait_until_containers_has_finished(list_of_containers_to_finish=continuous_containers,
                                        docker_client=docker_client, name_suffix=name_suffix)
 
     end_of_day_processes = ['cleaner', 'daily_processes']
