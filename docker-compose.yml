@@ -184,7 +184,7 @@ services:
         - ./reports:/home/reports
         - ./csv_backup:/home/csv_backup
         - ./backtests:/home/backtests
-        - ./logs/jupyter:/home/jupyter
+        - ./logs/jupyter:/home/logs
       depends_on:
         - ib_gateway
         - mongo_db
